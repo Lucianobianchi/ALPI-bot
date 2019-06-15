@@ -1,20 +1,11 @@
 numpy
-cv2
-serial
-time
-datetime
-struct 
-select
-socket 
-thread 
+opencv-python
+pyserial
 fcntl
-struct
-threading
-termios
 msvcrt
 tty
 argparse
-matplotlib.pyplot
+matplotlib
 
 
 
