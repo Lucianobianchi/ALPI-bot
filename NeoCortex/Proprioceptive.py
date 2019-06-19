@@ -71,8 +71,8 @@ def setupsensor():
         keys = d.keys()
         keys.sort()
         for key in keys:
-            print "%s : %s" % (key, d[key])
-            print ""
+            print("%s : %s") % (key, d[key])
+            print("")
 
 
     hidraw = hid.device(0x1b67, 0x0004)
@@ -138,7 +138,7 @@ def moveto(mtrn, hidraw, targetpos):
     for i in range(1,100):
         [acceleration, zenith, azimuth ] = tiltsensor(hidraw)
 
-        print str(acceleration) + '-' + str(zenith) + ',' + str(azimuth)
+        print(str(acceleration) + '-' + str(zenith) + ',' + str(azimuth))
 
         f.write( str(acceleration) + ' ' + str(zenith) + ' ' + str(output) + '\n'  )
 
@@ -155,7 +155,7 @@ def moveto(mtrn, hidraw, targetpos):
             cmd = 'AA170'
         else:
             cmd = 'AA140'
-        print str(output) + '-' + str(feedback) + ':' + cmd
+        print(str(output) + '-' + str(feedback) + ':' + cmd)
 
         mtrn.write(cmd)
 
@@ -188,7 +188,7 @@ class PIDTarget:
 
             [acceleration, zenith, azimuth ] = tiltsensor(hidraw)
 
-            print str(acceleration) + '-' + str(zenith) + ',' + str(azimuth)
+            print(str(acceleration) + '-' + str(zenith) + ',' + str(azimuth))
 
             f.write( str(acceleration) + ' ' + str(zenith) + ' ' + str(self.output) + '\n'  )
 
@@ -208,7 +208,7 @@ class PIDTarget:
                 cmd = 'A4200'
             else:
                 cmd = 'A3250'
-            print str(self.output) + '-' + str(self.feedback) + ':' + cmd
+            print(str(self.output) + '-' + str(self.feedback) + ':' + cmd)
 
             mtrn.write(cmd)
 
