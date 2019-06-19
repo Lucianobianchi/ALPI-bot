@@ -1,5 +1,3 @@
-#coding: latin-1
-
 # NeoCortex is the core program to control ShinkeyBot
 # It handles basic USB-Serial comm with other modules and handles
 # the basic operation of ShinkeyBot
@@ -11,40 +9,26 @@
 
 import numpy as np
 import cv2
-
+import Configuration
 import serial
-
 import time
 import datetime
 from struct import *
-
-import sys, os, select
-
-import socket
-
-import Proprioceptive as prop
-import thread
-#import PicameraStreamer as pcs
-import SensorimotorLogger as senso
-import MCast
-
-import fcntl
 import struct
+import sys, os, select
+import socket
+import fcntl
 
+import MCast
+from motor.MotorController import MotorController
+import SensorimotorLogger as senso
+import Proprioceptive as prop
+#import PicameraStreamer as pcs
 from Fps import Fps
-
-import MotorBridge
-import time
-
-motor = MotorBridge.MotorBridgeCape()
-motor.DCMotorInit(1,1000)
-motor.DCMotorInit(2,1000)
-motor.DCMotorInit(3,1000)
-motor.DCMotorInit(4,1000)
 
 # First create a witness token to guarantee only one instance running
 if (os.access("running.wt", os.R_OK)):
-    print >> sys.stderr, 'Another instance is running. Cancelling.'
+    print('Another instance is running. Cancelling.', file = sys.stderr)
     quit(1)
 
 runningtoken = open('running.wt', 'w')
@@ -56,11 +40,15 @@ runningtoken.close()
 
 def get_ip_address(ifname):
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    return socket.inet_ntoa(fcntl.ioctl(
-        s.fileno(),
-        0x8915,  # SIOCGIFADDR
-        struct.pack('256s', ifname[:15])
-    )[20:24])
+    try:
+        # doesn't even have to be reachable
+        s.connect(('10.255.255.255', 1))
+        IP = s.getsockname()[0]
+    except:
+        IP = '127.0.0.1'
+    finally:
+        s.close()
+    return IP
 
 
 # Get PiCamera stream and read everything in another thread.
@@ -74,10 +62,10 @@ def get_ip_address(ifname):
 # Ok, so the first thing to do is to broadcast my own IP address.
 dobroadcastip = True
 
-# Initialize UDP Controller Server on port 10001 (ShinkeyBotController)
+# Initialize UDP Controller Server on port 10001 (BotController)
 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 server_address = ('0.0.0.0', 10001)
-print >> sys.stderr, 'Starting up Controller Server on %s port %s', server_address
+print(f"Starting up Controller Server on {server_address[0]} port {server_address[1]}")
 sock.bind(server_address)
 
 if (dobroadcastip):
@@ -94,9 +82,9 @@ if (len(myip)>0):
 else:
     myip = 'None'
 
-# Shinkeybot truly does nothing until it gets connected to ShinkeyBotController
+# Shinkeybot truly does nothing until it gets connected to BotController
 whenistarted = time.time()
-print('Multicasting my own IP address:' + myip)
+print('Multicasting my own IP address: ' + myip)
 while dobroadcastip:
     noticer.send()
     try:
@@ -106,7 +94,7 @@ while dobroadcastip:
     except:
         data = None
 
-    if (abs(time.time()-whenistarted)>60):
+    if (abs(time.time()-whenistarted) > 5):
         print ('Giving up broadcasting ip... Lets get started.')
         break
 
@@ -148,21 +136,10 @@ def doserial():
 ssmr = None
 mtrn = None
 
-
-def stopMotors():
-    motor.DCMotorStop(1)
-    motor.DCMotorStop(2)
-    motor.DCMotorStop(3)
-    motor.DCMotorStop(4)
-
-
 def terminateme():
     try:
         t.cancel()
-        motor.DCMotorStop(1)
-        motor.DCMotorStop(2)
-        motor.DCMotorStop(3)
-        motor.DCMotorStop(4)
+        motor.stop()
         print ('Thread successfully closed.')
     except Exception as e:
         print ('Exception while closing video stream thread.')
@@ -189,8 +166,6 @@ visualpos = [90,95]
 
 scan = 90
 
-pwmduty = 190
-
 # Enables the sensor telemetry.  Arduinos will send telemetry data that will be
 #  sent to listening servers.
 sensesensor = False
@@ -208,7 +183,7 @@ sensesensor = False
 
 class Surrogator:
     def __init__(self, sock):
-        print ('Remote controlling ShinkeyBot')
+        print ('Remote controlling ALPIBot')
         self.data = ''
         self.message = ''
         self.controlvalue = 0
@@ -260,7 +235,6 @@ sur = Surrogator(sock)
 #    pass
 
 target = [0,0,0]
-automode = False;
 
 fps = Fps()
 fps.tic()
@@ -268,6 +242,9 @@ fps.tic()
 ts = time.time()
 st = datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d-%H-%M-%S')
 runninglog = open('../data/brainstem.'+st+'.dat', 'w')
+
+# TODO: feo, arreglar
+motor = MotorController(mock = True, pwmduty = 190)
 
 # Live
 while(True):
@@ -352,51 +329,23 @@ while(True):
                 mtrn.write('AC000')
                 # wrist down
             elif (data==' '):
-                stopMotors()
-                # Quiet
+                motor.stop()
             elif (data=='W'):
-                motor.DCMotorMove(1,1,pwmduty)
-                motor.DCMotorMove(2,1,pwmduty)
-                motor.DCMotorMove(3,1,pwmduty)
-                motor.DCMotorMove(4,1,pwmduty)
-                # Forward
+                motor.move_forward()
             elif (data=='S'):
-                motor.DCMotorMove(1,2,pwmduty)
-                motor.DCMotorMove(2,2,pwmduty)
-                motor.DCMotorMove(3,2,pwmduty)
-                motor.DCMotorMove(4,2,pwmduty)
-                # Backward
+                motor.move_backwards()
             elif (data=='D'):
-                motor.DCMotorMove(1,1,pwmduty)
-                motor.DCMotorMove(2,2,pwmduty)
-                motor.DCMotorMove(3,1,pwmduty)
-                motor.DCMotorMove(4,2,pwmduty)
-                # Right
+                motor.move_right()
             elif (data=='A'):
-                motor.DCMotorMove(1,2,pwmduty)
-                motor.DCMotorMove(2,1,pwmduty)
-                motor.DCMotorMove(3,2,pwmduty)
-                motor.DCMotorMove(4,1,pwmduty)
-                # Left
+                motor.move_left()
             elif (data=='K'):
-                motor.DCMotorMove(1,2,pwmduty)
-                motor.DCMotorMove(2,1,pwmduty)
-                motor.DCMotorMove(3,1,pwmduty)
-                motor.DCMotorMove(4,2,pwmduty)
-                # Rotate Left
+                motor.rotate_left()
             elif (data=='L'):
-                motor.DCMotorMove(1,1,pwmduty)
-                motor.DCMotorMove(2,2,pwmduty)
-                motor.DCMotorMove(3,2,pwmduty)
-                motor.DCMotorMove(4,1,pwmduty)
-                # Rotate Right
+                motor.rotate_right()
             elif (data=='.'):
-                pwmduty = pwmduty - 10
-                # Move slowly
+                motor.decrease_duty()
             elif (data==','):
-                pwmduty = pwmduty + 10
-                # Move coarsely
-
+                motor.increase_duty()
 
             elif (data=='('):
                 sensorimotor.sensorlocalburst = 100
@@ -420,7 +369,6 @@ while(True):
 #vst.keeprunning = False
 sur.keeprunning = False
 time.sleep(2)
-
 
 #When everything done, release the capture
 if (not ssmr == None):
