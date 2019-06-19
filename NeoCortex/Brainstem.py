@@ -96,7 +96,7 @@ else:
 
 # Shinkeybot truly does nothing until it gets connected to ShinkeyBotController
 whenistarted = time.time()
-print 'Multicasting my own IP address:' + myip
+print('Multicasting my own IP address:' + myip)
 while dobroadcastip:
     noticer.send()
     try:
@@ -107,13 +107,13 @@ while dobroadcastip:
         data = None
 
     if (abs(time.time()-whenistarted)>60):
-        print 'Giving up broadcasting ip... Lets get started.'
+        print ('Giving up broadcasting ip... Lets get started.')
         break
 
 from threading import Timer
 
 def timeout():
-    print 'Sending a multicast update of my own ip address:'+myip
+    print ('Sending a multicast update of my own ip address:'+myip)
     noticer.send()
 
 t = Timer(5 * 60, timeout)
@@ -123,7 +123,7 @@ if (dobroadcastip):
     sock.setblocking(1)
     sock.settimeout(0)
 
-print 'Connection to Remote Controller established.'
+print ('Connection to Remote Controller established.')
 
 # Open connection to tilt sensor (@deprecated)
 #hidraw = prop.setupsensor()
@@ -135,10 +135,10 @@ def doserial():
     while (retries<5):
         try:
             [ssmr, mtrn] = prop.serialcomm()
-            print 'Connection established'
+            print ('Connection established')
             return [ssmr, mtrn]
         except Exception as e:
-            print 'Error while establishing serial connection.'
+            print ('Error while establishing serial connection.')
             retries=retries+1
 
     return [ssmr, mtrn]
@@ -163,13 +163,13 @@ def terminateme():
         motor.DCMotorStop(2)
         motor.DCMotorStop(3)
         motor.DCMotorStop(4)
-        print 'Thread successfully closed.'
+        print ('Thread successfully closed.')
     except Exception as e:
-        print 'Exception while closing video stream thread.'
+        print ('Exception while closing video stream thread.')
         traceback.print_exc(file=sys.stdout)
 
     os.remove('running.wt')
-    print 'ShinkeyBot has stopped.'
+    print ('ShinkeyBot has stopped.')
 
 
 #if (ssmr == None and mtrn == None):
@@ -208,7 +208,7 @@ sensesensor = False
 
 class Surrogator:
     def __init__(self, sock):
-        print 'Remote controlling ShinkeyBot'
+        print ('Remote controlling ShinkeyBot')
         self.data = ''
         self.message = ''
         self.controlvalue = 0
@@ -249,7 +249,7 @@ class Surrogator:
             if (self.data == 'X'):
                 break
 
-        print 'Stopping surrogate...'
+        print ('Stopping surrogate...')
 
 sur = Surrogator(sock)
 
@@ -309,7 +309,7 @@ while(True):
                     #    ssmr.write('5')
                     #    time.sleep(0.1)
 
-                    print 'Auto:Sensing distance:'+str(sens[15])
+                    print ('Auto:Sensing distance:'+str(sens[15]))
                     ssmr.write('+')
                     ssmr.write('2')
                     if (sens[15]<90):
@@ -331,7 +331,7 @@ while(True):
                     motorneuron.ip = address[0]
                     motorneuron.restart()
 
-                print "Reloading target ip for telemetry:"+sensorimotor.ip
+                print ("Reloading target ip for telemetry:"+sensorimotor.ip)
 
                 # Vst VideoStream should be likely restarted in order to check
                 # if something else can be enabled.
@@ -405,8 +405,8 @@ while(True):
             elif (data=='X'):
                 break
     except Exception as e:
-        print "Error:" + e.message
-        print "Waiting for serial connection to reestablish..."
+        print ("Error:" + e.message)
+        print ("Waiting for serial connection to reestablish...")
         if (not ssmr == None):
             ssmr.close()
         if (not mtrn == None):
