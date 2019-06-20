@@ -1,5 +1,9 @@
 import time
 
+import os
+import sys
+# sys.path.append(os.path.abspath('./motor'))
+
 class MotorController:
     def __init__(self, *, pwmduty = 190, mock = False):
         if mock:

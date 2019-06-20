@@ -218,7 +218,7 @@ class PIDTarget:
 # NavData Recording
 ts = time.time()
 st = datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d-%H-%M-%S')
-f = open('../data/navdata'+st+'.dat', 'w')
+f = open('./data/navdata'+st+'.dat', 'w')
 
 
 def __init__(self):
