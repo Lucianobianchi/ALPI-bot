@@ -4,7 +4,6 @@
 
 # x) Transmit TCP/IP images through CameraStreamer.
 # x) Captures sensor data from SensorimotorLogger
-# x) Handles output to motor unit and sensorimotor commands through Proprioceptive
 # x) Receives high-level commands from ShinkeyBotController.
 
 import numpy as np
@@ -23,9 +22,8 @@ import signal
 import time
 
 from connection import MCast
-from motor.MotorController import MotorController
-import Proprioceptive as prop
-#import PicameraStreamer as pcs
+from motor.SerialMotorController import SerialMotorController
+from SerialConnection import SerialConnection
 from Fps import Fps
 
 # First create a witness token to guarantee only one instance running
@@ -143,9 +141,10 @@ class Surrogator:
             self.message, self.address = self.sock.recvfrom(5)
             self.command = self.message[0]
             self.data = self.message[1]
+            print('Data', self.data)
             self.controlvalue = int(self.message[2:5])
         except Exception as e:
-            pass
+            print(e)
 
 
     def hookme(self):
@@ -173,10 +172,10 @@ fps.tic()
 
 ts = time.time()
 st = datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d-%H-%M-%S')
-runninglog = open('./data/brainstem.'+st+'.dat', 'w')
+# runninglog = open('./data/brainstem.'+st+'.dat', 'w')
 
-# TODO: feo, arreglar
-motor = MotorController(mock = True, pwmduty = 190)
+connection = SerialConnection(portname='/dev/ttys000')
+motor = SerialMotorController(connection = connection)
 
 # Live
 while(True):
@@ -189,6 +188,9 @@ while(True):
         # TCP/IP server is configured as non-blocking
         sur.getmessage()
         data, address = sur.data, sur.address
+
+        print(sur.command)
+        print(sur.data)
 
         if (sur.command == 'A'):
             if (len(sur.message)==5):
@@ -205,39 +207,29 @@ while(True):
 
             elif (data==' '):
                 motor.stop()
-            elif (data=='W'):
+            elif (data=='w'):
                 motor.move_forward()
-            elif (data=='S'):
+            elif (data=='s'):
                 motor.move_backwards()
-            elif (data=='D'):
+            elif (data=='d'):
                 motor.move_right()
-            elif (data=='A'):
+            elif (data=='a'):
                 motor.move_left()
-            elif (data=='K'):
+            elif (data=='k'):
                 motor.rotate_left()
-            elif (data=='L'):
+            elif (data=='l'):
                 motor.rotate_right()
             elif (data=='.'):
-                motor.decrease_duty()
+                motor.decrease_speed()
             elif (data==','):
-                motor.increase_duty()
+                motor.increase_speed()
             elif (data=='X'):
                 break
 
     except Exception as e:
-        # print ("Error:" + e.message)
+        print ("Error:" + e.message)
         print ("Waiting for serial connection to reestablish...")
-        # if (not ssmr == None):
-        #     ssmr.close()
-        # if (not mtrn == None):
-        #     mtrn.close()
-        # #[ssmr, mtrn] = doserial()
 
-        # # Instruct the Sensorimotor Cortex to stop wandering.
-        # if (ssmr != None):
-        #     ssmr.write('C')
-
-#vst.keeprunning = False
 sur.keeprunning = False
 time.sleep(2)
 

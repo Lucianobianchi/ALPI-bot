@@ -62,6 +62,8 @@ while (True):
       sock.close()
       quit()
 
+  print(data)
+
   sent = sock.sendto(bytes('U'+data+'000', 'ascii'), server_address)
 
   if (data.startswith('!')):
