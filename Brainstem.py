@@ -144,7 +144,7 @@ class Surrogator:
             print('Data', self.data)
             self.controlvalue = int(self.message[2:5])
         except Exception as e:
-            print(e)
+            pass
 
 
     def hookme(self):
@@ -180,17 +180,11 @@ motor = SerialMotorController(connection = connection)
 # Live
 while(True):
     try:
-        fps.steptoc()
-        ts = int(time.time())
-        # runninglog.write(str(ts) + ',' + str(fps.fps) + '\n')
-        #print "Estimated frames per second: {0}".format(fps.fps)
-        data = ''
         # TCP/IP server is configured as non-blocking
         sur.getmessage()
-        data, address = sur.data, sur.address
-
-        print(sur.command)
-        print(sur.data)
+        
+        cmd = chr(sur.command)
+        cmd_data = chr(sur.data)
 
         if (sur.command == 'A'):
             if (len(sur.message)==5):
@@ -226,9 +220,9 @@ while(True):
             elif (data=='X'):
                 break
 
-    except Exception as e:
-        print ("Error:" + e.message)
-        print ("Waiting for serial connection to reestablish...")
+    # except Exception as e:
+    #     print ("Error:" + e.message)
+    #     print ("Waiting for serial connection to reestablish...")
 
 sur.keeprunning = False
 time.sleep(2)
