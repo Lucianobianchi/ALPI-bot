@@ -15,17 +15,18 @@ from connection import MCast
 from motor.SerialMotorController import SerialMotorController
 from SerialConnection import SerialConnection
 
+# --- Disabling this for now, it was giving me some headaches
 # First create a witness token to guarantee only one instance running
-if (os.access("running.wt", os.R_OK)):
-    print('Another instance is running. Cancelling.')
-    quit(1)
+# if (os.access("running.wt", os.R_OK)):
+#     print('Another instance is running. Cancelling.')
+#     quit(1)
 
-runningtoken = open('running.wt', 'w')
-ts = time.time()
-st = datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d-%H-%M-%S')
+# runningtoken = open('running.wt', 'w')
+# ts = time.time()
+# st = datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d-%H-%M-%S')
 
-runningtoken.write(st)
-runningtoken.close()
+# runningtoken.write(st)
+# runningtoken.close()
 
 def get_ip_address(ifname):
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -157,6 +158,7 @@ def terminate():
     exit(0)
 
 signal.signal(signal.SIGINT, lambda signum, frame: terminate())
+signal.signal(signal.SIGTERM, lambda signum, frame: terminate())
 
 # Live
 while(True):
@@ -203,6 +205,8 @@ while(True):
             motor.increase_speed()
         elif (cmd_data == 'X'):
             break
+
+    sys.stdout.flush() # for service to print logs?
 
 sur.keeprunning = False
 
