@@ -82,18 +82,6 @@ if (Configuration.broadcast_IP):
     sock.setblocking(1)
     sock.settimeout(0)
 
-def terminate():
-    try:
-        motor.stop()
-        print('Motors successfully stopped.')
-    except e:
-        print('Exception while stopping motors.', e)
-    finally:
-        os.remove('running.wt')
-    print ('ALPIBot has stopped.')
-
-signal.signal(signal.SIGINT, terminate)
-
 tgt = -300
 
 # Enables the sensor telemetry.  Arduinos will send telemetry data that will be
@@ -157,6 +145,19 @@ st = datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d-%H-%M-%S')
 connection = SerialConnection(portname='/dev/ttys000')
 motor = SerialMotorController(connection = connection)
 
+def terminate():
+    print('Stopping ALPIBot')
+    
+    try:
+        motor.stop()
+    finally:
+        os.remove('running.wt')
+
+    print ('ALPIBot has stopped.')
+    exit(0)
+
+signal.signal(signal.SIGINT, lambda signum, frame: terminate())
+
 # Live
 while(True):
         # TCP/IP server is configured as non-blocking
@@ -204,7 +205,7 @@ while(True):
             break
 
 sur.keeprunning = False
-time.sleep(2)
 
 #When everything done, release the capture
 sock.close()
+terminate()
