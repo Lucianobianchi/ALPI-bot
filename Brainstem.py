@@ -1,13 +1,3 @@
-# coding=utf-8
-
-# NeoCortex is the core program to control ALPIBot
-
-# x) Transmit TCP/IP images through CameraStreamer.
-# x) Captures sensor data from SensorimotorLogger
-# x) Receives high-level commands from ShinkeyBotController.
-
-import numpy as np
-import cv2
 import Configuration
 import serial
 import time
@@ -24,7 +14,6 @@ import time
 from connection import MCast
 from motor.SerialMotorController import SerialMotorController
 from SerialConnection import SerialConnection
-from Fps import Fps
 
 # First create a witness token to guarantee only one instance running
 if (os.access("running.wt", os.R_OK)):
@@ -130,20 +119,21 @@ class Surrogator:
         try:
             # Read from the UDP controller socket non blocking
             self.data, self.address = self.sock.recvfrom(1)
-        except Exception as e:
+        except Exception:
             pass
 
     def getmessage(self):
         self.data = ''
+        self.command = ''
         try:
             # Read from the UDP controller socket non blocking
             # The message format is AANNN
             self.message, self.address = self.sock.recvfrom(5)
-            self.command = self.message[0]
-            self.data = self.message[1]
+            self.command = chr(int(self.message[0]))
+            self.data = chr(int(self.message[1]))
             print('Data', self.data)
             self.controlvalue = int(self.message[2:5])
-        except Exception as e:
+        except Exception:
             pass
 
 
@@ -159,74 +149,62 @@ class Surrogator:
 
 sur = Surrogator(sock)
 
-#try:
-#    thread.start_new_thread( sur.hookme, () )
-#    pass
-#except:
-#    pass
-
 target = [0,0,0]
-
-fps = Fps()
-fps.tic()
 
 ts = time.time()
 st = datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d-%H-%M-%S')
-# runninglog = open('./data/brainstem.'+st+'.dat', 'w')
 
 connection = SerialConnection(portname='/dev/ttys000')
 motor = SerialMotorController(connection = connection)
 
 # Live
 while(True):
-    try:
         # TCP/IP server is configured as non-blocking
-        sur.getmessage()
-        
-        cmd = chr(sur.command)
-        cmd_data = chr(sur.data)
+    sur.getmessage()
+    
+    cmd = sur.command
+    cmd_data = sur.data
 
-        if (sur.command == 'A'):
-            if (len(sur.message)==5):
-                # Sending the message that was received.
-                # ssmr.write(sur.message)
-                sur.message = ''
+    if (cmd_data != ''):
+        print(cmd)
+        print(cmd_data)
 
-        elif (sur.command == 'U'):
-            # Activate/Deactivate sensor data.
-            if (data == 'Q'):
-                sensesensor = True
-            elif (data == 'q'):
-                sensesensor = False
+    if (cmd == 'A'):
+        if (len(sur.message)==5):
+            # Sending the message that was received.
+            # ssmr.write(sur.message)
+            sur.message = ''
 
-            elif (data==' '):
-                motor.stop()
-            elif (data=='w'):
-                motor.move_forward()
-            elif (data=='s'):
-                motor.move_backwards()
-            elif (data=='d'):
-                motor.move_right()
-            elif (data=='a'):
-                motor.move_left()
-            elif (data=='k'):
-                motor.rotate_left()
-            elif (data=='l'):
-                motor.rotate_right()
-            elif (data=='.'):
-                motor.decrease_speed()
-            elif (data==','):
-                motor.increase_speed()
-            elif (data=='X'):
-                break
+    elif (cmd == 'U'):
+        # Activate/Deactivate sensor data.
+        if (cmd_data == 'Q'):
+            sensesensor = True
+        elif (cmd_data == 'q'):
+            sensesensor = False
 
-    # except Exception as e:
-    #     print ("Error:" + e.message)
-    #     print ("Waiting for serial connection to reestablish...")
+        elif (cmd_data == ' '):
+            motor.stop()
+        elif (cmd_data == 'w'):
+            motor.move_forward()
+        elif (cmd_data == 's'):
+            motor.move_backwards()
+        elif (cmd_data == 'd'):
+            motor.move_right()
+        elif (cmd_data == 'a'):
+            motor.move_left()
+        elif (cmd_data == 'k'):
+            motor.rotate_left()
+        elif (cmd_data == 'l'):
+            motor.rotate_right()
+        elif (cmd_data == '.'):
+            motor.decrease_speed()
+        elif (cmd_data == ','):
+            motor.increase_speed()
+        elif (cmd_data == 'X'):
+            break
 
 sur.keeprunning = False
 time.sleep(2)
 
 #When everything done, release the capture
 sock.close()
-terminate()
