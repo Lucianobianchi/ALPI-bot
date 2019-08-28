@@ -1,0 +1,11 @@
+[Unit]
+Description=Service to run ALPIBot base python program
+After=network-online.target
+
+[Service]
+Type=idle
+ExecStart=/usr/local/bin/python3 /home/pi/ALPI-bot/Brainstem.py
+WorkingDirectory=/home/pi/ALPI-bot
+
+[Install]
+WantedBy=network-online.target
