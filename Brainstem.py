@@ -143,7 +143,11 @@ target = [0,0,0]
 ts = time.time()
 st = datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d-%H-%M-%S')
 
+<<<<<<< HEAD
 connection = SerialConnection(portname='/dev/cu.usbmodem14401')
+=======
+connection = SerialConnection(portname='/dev/ttys000')
+>>>>>>> cf1b83c6f3918d70df000c9014c10e9f1567d6da
 motor = SerialMotorController(connection = connection)
 
 def terminate():
@@ -162,7 +166,11 @@ signal.signal(signal.SIGTERM, lambda signum, frame: terminate())
 
 # Live
 while(True):
+<<<<<<< HEAD
     # TCP/IP server is configured as non-blocking
+=======
+        # TCP/IP server is configured as non-blocking
+>>>>>>> cf1b83c6f3918d70df000c9014c10e9f1567d6da
     sur.getmessage()
     
     cmd = sur.command
