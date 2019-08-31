@@ -143,7 +143,7 @@ target = [0,0,0]
 ts = time.time()
 st = datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d-%H-%M-%S')
 
-connection = SerialConnection(portname='/dev/ttys000')
+connection = SerialConnection(portname='/dev/cu.usbmodem14401')
 motor = SerialMotorController(connection = connection)
 
 def terminate():
@@ -162,7 +162,7 @@ signal.signal(signal.SIGTERM, lambda signum, frame: terminate())
 
 # Live
 while(True):
-        # TCP/IP server is configured as non-blocking
+    # TCP/IP server is configured as non-blocking
     sur.getmessage()
     
     cmd = sur.command

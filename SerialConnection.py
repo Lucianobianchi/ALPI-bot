@@ -5,7 +5,7 @@ import datetime
 TRIES = 10
 
 class SerialConnection(object): 
-  def __init__(self, *, portname = '/dev/tty0'):
+  def __init__(self, *, portname):
     self.open = False
     tries = 0
     while (tries < TRIES):
