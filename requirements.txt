@@ -1,0 +1,12 @@
+numpy
+opencv-python
+pyserial
+fcntl
+msvcrt
+tty
+argparse
+matplotlib
+
+
+
+

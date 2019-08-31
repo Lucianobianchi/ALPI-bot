@@ -23,7 +23,7 @@ data2 = 2
 data3 = 3
 
 if (len(sys.argv)>=2):
-    print "Reading which data to shown"
+    print("Reading which data to shown")
     data1 = int(sys.argv[1])
     data2 = int(sys.argv[2])
     data3 = int(sys.argv[3])
@@ -63,13 +63,13 @@ if (serialconnected):
     time.sleep(6)
 
     buf = ser.readline()
-    print str(buf)
+    print(str(buf))
 
     buf = ser.readline()
-    print str(buf)
+    print(str(buf))
 
     buf = ser.readline()
-    print str(buf)
+    print(str(buf))
 
     ser.write('S')
 
@@ -162,4 +162,4 @@ while True:
 f.close()
 if (serialconnected):
    ser.close()
-print 'Everything successfully closed.'
+print('Everything successfully closed.')
