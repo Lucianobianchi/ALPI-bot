@@ -13,6 +13,8 @@ import threading
 
 #GPIO Mode (BOARD / BCM)
 GPIO.setmode(GPIO.BCM)
+
+GPIO.cleanup()
  
 #set GPIO Pins
 GPIO_TRIGGER = 18
@@ -22,6 +24,8 @@ GPIO_ECHO = 24
 GPIO.setup(GPIO_TRIGGER, GPIO.OUT)
 GPIO.setup(GPIO_ECHO, GPIO.IN)
  
+GPIO.cleanup()
+
 _distance = -1
 def distance():
     return _distance
@@ -29,29 +33,36 @@ def distance():
 def ultrasonic_sensor_thread(name):
     global _distance
 
-    print('Ultrasonic sensor thread')
-    while True:
-        # set Trigger to HIGH
-        GPIO.output(GPIO_TRIGGER, True)
-    
-        # set Trigger after 0.01ms to LOW
-        time.sleep(0.00001)
-        GPIO.output(GPIO_TRIGGER, False)
-    
-        start_time = time.time()
-        stop_time = time.time()
-    
-        while GPIO.input(GPIO_ECHO) == 0:
+    try: 
+        print('Ultrasonic sensor thread')
+        while True:
+            # set Trigger to HIGH
+            GPIO.output(GPIO_TRIGGER, True)
+        
+            # set Trigger after 0.01ms to LOW
+            time.sleep(0.00001)
+            GPIO.output(GPIO_TRIGGER, False)
+        
             start_time = time.time()
-    
-        while GPIO.input(GPIO_ECHO) == 1:
             stop_time = time.time()
+        
+            while GPIO.input(GPIO_ECHO) == 0:
+                start_time = time.time()
+        
+            while GPIO.input(GPIO_ECHO) == 1:
+                stop_time = time.time()
+        
+            # time difference between start and arrival
+            time_elapsed = stop_time - start_time
+            # multiply with the sonic speed (34300 cm/s)
+            # and divide by 2, because there and back
+            _distance = (time_elapsed * 34300) / 2
+
+    finally: 
+        GPIO.cleanup()
     
-        # time difference between start and arrival
-        time_elapsed = stop_time - start_time
-        # multiply with the sonic speed (34300 cm/s)
-        # and divide by 2, because there and back
-        _distance = (time_elapsed * 34300) / 2
 
 ut = threading.Thread(target=ultrasonic_sensor_thread, args=(1,))
-ut.start()
+
+def start():
+    ut.start()
