@@ -14,10 +14,11 @@ import time
 from connection import MCast
 from motor.SerialMotorController import SerialMotorController
 from SerialConnection import SerialConnection
+from sensors import Ultrasonic 
 
 # --- Disabling this for now, it was giving me some headaches
-# First create a witness token to guarantee only one instance running
-# if (os.access("running.wt", os.R_OK)):
+# First create a witness token to guarantee only one instance running
+#  if (os.access("running.wt", os.R_OK)):
 #     print('Another instance is running. Cancelling.')
 #     quit(1)
 
@@ -40,7 +41,7 @@ def get_ip_address(ifname):
         s.close()
     return IP
 
-# Initialize UDP Controller Server on port 10001 (BotController)
+# Initialize UDP Controller Server on port 10001 (BotController)
 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 server_address = ('0.0.0.0', 10001)
 print(f"Starting up Controller Server on {server_address[0]} port {server_address[1]}")
@@ -146,6 +147,8 @@ st = datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d-%H-%M-%S')
 connection = SerialConnection(portname='/dev/cu.usbmodem14401')
 motor = SerialMotorController(connection = connection)
 
+Ultrasonic.start()
+
 def terminate():
     print('Stopping ALPIBot')
     
@@ -159,6 +162,8 @@ def terminate():
 
 signal.signal(signal.SIGINT, lambda signum, frame: terminate())
 signal.signal(signal.SIGTERM, lambda signum, frame: terminate())
+
+use_ultrasonic = False
 
 # Live
 while(True):
@@ -178,6 +183,9 @@ while(True):
             # ssmr.write(sur.message)
             sur.message = ''
 
+    if (use_ultrasonic):
+        print(Ultrasonic.distance())
+
     elif (cmd == 'U'):
         # Activate/Deactivate sensor data.
         if (cmd_data == 'Q'):
@@ -187,10 +195,15 @@ while(True):
 
         elif (cmd_data == ' '):
             motor.stop()
-        elif (cmd_data == 'w'):
-            motor.move_forward()
-        elif (cmd_data == 's'):
-            motor.move_backwards()
+
+        elif (cmd_data == 'u'):
+            use_ultrasonic = not use_ultrasonic
+        
+        # elif (cmd_data == 'w'):
+        #     motor.move_forward()
+        # elif (cmd_data == 's'):
+        #     motor.move_backwards()
+
         elif (cmd_data == 'd'):
             motor.move_right()
         elif (cmd_data == 'a'):
@@ -206,10 +219,10 @@ while(True):
         elif (cmd_data == 'X'):
             break
 
-    sys.stdout.flush() # for service to print logs?
+    sys.stdout.flush() # for service to print logs
 
 sur.keeprunning = False
 
-#When everything done, release the capture
+# When everything done, release the capture
 sock.close()
 terminate()

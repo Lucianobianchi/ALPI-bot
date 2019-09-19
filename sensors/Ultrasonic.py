@@ -2,7 +2,7 @@ try:
     import RPi.GPIO as GPIO
     test_environment = False
 except (ImportError, RuntimeError):
-    import GPIOMock as GPIO
+    from sensors import GPIOMock as GPIO
     test_environment = True
 
 if (test_environment):
