@@ -1,12 +1,15 @@
 try:
     import RPi.GPIO as GPIO
-    test_environment = False
+    enviorment = 'raspi'
 except (ImportError, RuntimeError):
-    from sensors import GPIOMock as GPIO
-    test_environment = True
+    try: 
+        import Jetson.GPIO as GPIO
+        enviorment = 'jetson'
+    except (ImportError, RuntimeError):
+        from sensors import GPIOMock as GPIO
+        enviorment = 'other'
 
-if (test_environment):
-    print('In test enviorment')
+print('Enviorment: ', enviorment)
 
 import time
 import threading
@@ -15,8 +18,12 @@ import threading
 GPIO.setmode(GPIO.BCM)
  
 #set GPIO Pins
-GPIO_TRIGGER = 18
-GPIO_ECHO = 24
+if enviorment == 'raspi':
+    GPIO_TRIGGER = 18
+    GPIO_ECHO = 24
+else: # jetson
+    GPIO_TRIGGER = 19
+    GPIO_ECHO = 21
  
 #set GPIO direction (IN / OUT)
 GPIO.setup(GPIO_TRIGGER, GPIO.OUT)
