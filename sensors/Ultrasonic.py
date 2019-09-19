@@ -23,15 +23,21 @@ GPIO.setup(GPIO_TRIGGER, GPIO.OUT)
 GPIO.setup(GPIO_ECHO, GPIO.IN)
 
 _distance = -1
+is_dead = False
+
 def distance():
     return _distance
 
 def ultrasonic_sensor_thread(name):
     global _distance
+    global is_dead
 
     try: 
         print('Ultrasonic sensor thread')
         while True:
+            if is_dead:
+                break
+
             # set Trigger to HIGH
             GPIO.output(GPIO_TRIGGER, True)
         
@@ -62,3 +68,8 @@ ut = threading.Thread(target=ultrasonic_sensor_thread, args=(1,))
 
 def start():
     ut.start()
+
+def stop():
+    global is_dead
+    is_dead = True
+

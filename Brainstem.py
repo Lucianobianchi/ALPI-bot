@@ -153,6 +153,7 @@ def terminate():
     print('Stopping ALPIBot')
     
     try:
+        Ultrasonic.stop()
         motor.stop()
     except:
         pass
@@ -229,5 +230,7 @@ while(True):
 sur.keeprunning = False
 
 # When everything done, release the capture
+Ultrasonic.stop()
+Ultrasonic.ut.join()
 sock.close()
 terminate()
