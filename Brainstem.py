@@ -183,9 +183,6 @@ while(True):
             # ssmr.write(sur.message)
             sur.message = ''
 
-    if (use_ultrasonic):
-        print(Ultrasonic.distance())
-
     elif (cmd == 'U'):
         # Activate/Deactivate sensor data.
         if (cmd_data == 'Q'):
@@ -197,7 +194,9 @@ while(True):
             motor.stop()
 
         elif (cmd_data == 'u'):
+            print(Ultrasonic.distance())
             use_ultrasonic = not use_ultrasonic
+            print(use_ultrasonic)
         
         # elif (cmd_data == 'w'):
         #     motor.move_forward()
