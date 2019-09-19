@@ -74,9 +74,14 @@ def ultrasonic_sensor_thread(name):
 ut = threading.Thread(target=ultrasonic_sensor_thread, args=(1,))
 
 def start():
+    global ut
+    global is_dead
+    is_dead = False
+    ut = threading.Thread(target=ultrasonic_sensor_thread, args=(1,))
     ut.start()
 
 def stop():
     global is_dead
     is_dead = True
+    ut.join()
 
