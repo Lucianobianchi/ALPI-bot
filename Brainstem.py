@@ -197,7 +197,9 @@ while(True):
             motor.stop()
 
         elif (cmd_data == 'u'):
+            print(Ultrasonic.distance())
             use_ultrasonic = not use_ultrasonic
+            print(use_ultrasonic)
         
         # elif (cmd_data == 'w'):
         #     motor.move_forward()
