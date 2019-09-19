@@ -154,8 +154,14 @@ def terminate():
     
     try:
         motor.stop()
-    finally:
+    except:
+        pass
+    
+    try:
         os.remove('running.wt')
+    except:
+        pass
+
 
     print ('ALPIBot has stopped.')
     exit(0)
