@@ -144,7 +144,8 @@ target = [0,0,0]
 ts = time.time()
 st = datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d-%H-%M-%S')
 
-connection = SerialConnection(portname='/dev/cu.usbmodem14401')
+# connection = SerialConnection(portname='/dev/cu.usbmodem14401')
+connection = SerialConnection(portname='/dev/ttyACM0')
 motor = SerialMotorController(connection = connection)
 
 Ultrasonic.start()
@@ -200,15 +201,15 @@ while(True):
         elif (cmd_data == ' '):
             motor.stop()
 
-        elif (cmd_data == 'u'):
-            print(Ultrasonic.distance())
-            use_ultrasonic = not use_ultrasonic
-            print(use_ultrasonic)
+        #elif (cmd_data == 'u'):
+        #    print(Ultrasonic.distance())
+        #    use_ultrasonic = not use_ultrasonic
+        #    print(use_ultrasonic)
         
-        # elif (cmd_data == 'w'):
-        #     motor.move_forward()
-        # elif (cmd_data == 's'):
-        #     motor.move_backwards()
+        elif (cmd_data == 'w'):
+            motor.move_forward()
+        elif (cmd_data == 's'):
+            motor.move_backwards()
 
         elif (cmd_data == 'd'):
             motor.move_right()
@@ -231,6 +232,5 @@ sur.keeprunning = False
 
 # When everything done, release the capture
 Ultrasonic.stop()
-Ultrasonic.ut.join()
 sock.close()
 terminate()

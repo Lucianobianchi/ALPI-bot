@@ -1,27 +1,23 @@
 try:
     import RPi.GPIO as GPIO
-    enviorment = 'raspi'
 except (ImportError, RuntimeError):
     try: 
         import Jetson.GPIO as GPIO
-        enviorment = 'jetson'
     except (ImportError, RuntimeError):
         from sensors import GPIOMock as GPIO
-        enviorment = 'other'
-
-print('Enviorment: ', enviorment)
 
 import time
 import threading
 
-#GPIO Mode (BOARD / BCM)
-GPIO.setmode(GPIO.BCM)
- 
-#set GPIO Pins
+enviorment = 'jetson'
+
+#setup GPIO Pins
 if enviorment == 'raspi':
+    GPIO.setmode(GPIO.BCM)
     GPIO_TRIGGER = 18
     GPIO_ECHO = 24
 else: # jetson
+    GPIO.setmode(GPIO.BOARD)
     GPIO_TRIGGER = 19
     GPIO_ECHO = 21
  
@@ -54,7 +50,7 @@ def ultrasonic_sensor_thread(name):
         
             start_time = time.time()
             stop_time = time.time()
-        
+            
             while GPIO.input(GPIO_ECHO) == 0:
                 start_time = time.time()
         
@@ -83,5 +79,4 @@ def start():
 def stop():
     global is_dead
     is_dead = True
-    ut.join()
 
