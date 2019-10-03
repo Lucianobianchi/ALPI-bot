@@ -6,6 +6,8 @@
 void setup() {
   Serial.begin(9600);           // set up Serial library at 9600 bps
   Serial.println("ALPI Bot motors, alive and well");
+
+  setupMotorEncoders();
 }
 
 void processCommand(int cmd) {
@@ -32,7 +34,7 @@ void processCommand(int cmd) {
       break;
     case 116: // 't'
       // Telemetry data
-      Serial.print("Telemetry!")
+      Serial.print("Telemetry!");
     default:
       Serial.println("Unsupported command: ");
       Serial.println(cmd);
@@ -45,4 +47,5 @@ void loop() {
     Serial.print(" Received:"); Serial.println(incomingByte);
     processCommand(incomingByte);
   }
+  loopEncoders();
 }
