@@ -21,6 +21,13 @@ function DraggableAnchor(botX, botY, anchorX, anchorY) {
         strokeWeight(2);
         line(vLeft.x, vLeft.y, this.anchorX, this.anchorY);
         line(vRight.x, vRight.y, this.anchorX, this.anchorY);
+
+        // Strings new lengths
+        let vAnchor = createVector(this.anchorX, this.anchorY);
+        this.leftLen = vLeft.dist(vAnchor);
+        this.rightLen = vRight.dist(vAnchor);
+
+        // console.log(this.leftLen, this.rightLen);
     }
 
     this.mousePress = function(x, y) {
