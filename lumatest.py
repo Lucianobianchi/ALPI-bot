@@ -12,6 +12,8 @@ serial = i2c(port=0, address=0x3C)
 device = ssd1306(serial)
 
 with canvas(device) as draw:
+    draw.text((0, 0), cpu_usage(), font=font2, fill="white")
+
     draw.rectangle((10, 10, 130, 130), outline="white", fill="white") 
     
 sleep(10)
