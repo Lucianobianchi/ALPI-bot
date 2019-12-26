@@ -12,9 +12,11 @@ import signal
 import time
 
 from connection import MCast
-from motor.SerialMotorController import SerialMotorController
 from SerialConnection import SerialConnection
-from sensors import Ultrasonic 
+from motor.MotorCortex import MotorCortex
+from sensors.SensorimotorCortex import SensorimotorCortex
+
+from Fps import Fps
 
 # --- Disabling this for now, it was giving me some headaches
 # First create a witness token to guarantee only one instance running
@@ -44,7 +46,7 @@ def get_ip_address(ifname):
 # Initialize UDP Controller Server on port 10001 (BotController)
 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 server_address = ('0.0.0.0', 10001)
-print(f"Starting up Controller Server on {server_address[0]} port {server_address[1]}")
+print('Starting up Controller Server on '+server_address[0])
 sock.bind(server_address)
 
 if (Configuration.broadcast_IP):
@@ -83,6 +85,14 @@ def timeout():
 if (Configuration.broadcast_IP):
     sock.setblocking(1)
     sock.settimeout(0)
+
+
+import platform
+system_platform = platform.system()
+if system_platform == "Darwin":
+    import FFMPegStreamer as pcs
+else:
+    import H264Streamer as pcs
 
 tgt = -300
 
@@ -144,10 +154,19 @@ target = [0,0,0]
 ts = time.time()
 st = datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d-%H-%M-%S')
 
-connection = SerialConnection(portname='/dev/cu.usbmodem14401')
-motor = SerialMotorController(connection = connection)
+connection = SerialConnection(portname='/dev/cu.usbmodem143101')
+motor = MotorCortex(connection = connection)
+# Connect remotely to any client that is waiting for sensor loggers.
+sensorimotor = SensorimotorCortex('sensorimotor',40,'fiiihhhhhhhhhhhh')
+sensorimotor.start()
+sensorimotor.init(connection)
+sensorimotor.sensorlocalburst=1000
+sensorimotor.sensorburst=100
+sensorimotor.updatefreq=10
+sensorimotor.cleanbuffer()
 
-Ultrasonic.start()
+connection.send(b'AE010')
+connection.send(b'AB100')
 
 def terminate():
     print('Stopping ALPIBot')
@@ -163,61 +182,74 @@ def terminate():
 signal.signal(signal.SIGINT, lambda signum, frame: terminate())
 signal.signal(signal.SIGTERM, lambda signum, frame: terminate())
 
-use_ultrasonic = False
-
 # Live
 while(True):
-    # TCP/IP server is configured as non-blocking
-    sur.getmessage()
-    
-    cmd = sur.command
-    cmd_data = sur.data
+    try:
+        fps.steptoc()
+        ts = int(time.time())
+        #runninglog.write(str(ts) + ',' + str(fps.fps) + '\n')
+        #print "Estimated frames per second: {0}".format(fps.fps)
+        data = ''
+        # TCP/IP server is configured as non-blocking
+        sur.getmessage()
 
-    if (cmd_data != ''):
-        print(cmd)
-        print(cmd_data)
+        cmd = sur.command
+        cmd_data, address = sur.data, sur.address
 
-    if (cmd == 'A'):
-        if (len(sur.message)==5):
-            # Sending the message that was received.
-            # ssmr.write(sur.message)
-            sur.message = ''
+        # If someone asked for it, send sensor information.
+        if (sensesensor):
+            sens = sensorimotor.picksensorsample(ssmr)
+            mots = None
 
-    if (use_ultrasonic):
-        print(Ultrasonic.distance())
+            if (sens != None):
+                # Check where to put the value
+                sensorimotor.repack([0],[fps.fps])
+                sensorimotor.send(sensorimotor.data)
 
-    elif (cmd == 'U'):
-        # Activate/Deactivate sensor data.
-        if (cmd_data == 'Q'):
-            sensesensor = True
-        elif (cmd_data == 'q'):
-            sensesensor = False
+        if (cmd_data != ''):
+            print(cmd)
+            print(cmd_data)
 
-        elif (cmd_data == ' '):
-            motor.stop()
+        if (cmd == 'A'):
+            if (len(sur.message)==5):
+                # Sending the message that was received.
+                # ssmr.write(sur.message)
+                sur.message = ''
 
-        elif (cmd_data == 'u'):
-            use_ultrasonic = not use_ultrasonic
-        
-        # elif (cmd_data == 'w'):
-        #     motor.move_forward()
-        # elif (cmd_data == 's'):
-        #     motor.move_backwards()
+        elif (cmd == 'U'):
+            # Activate/Deactivate sensor data.
+            if (cmd_data == '!'):
+                # IP Address exchange.
+                sensorimotor.ip = address[0]
+                sensorimotor.restart()
 
-        elif (cmd_data == 'd'):
-            motor.move_right()
-        elif (cmd_data == 'a'):
-            motor.move_left()
-        elif (cmd_data == 'k'):
-            motor.rotate_left()
-        elif (cmd_data == 'l'):
-            motor.rotate_right()
-        elif (cmd_data == '.'):
-            motor.decrease_speed()
-        elif (cmd_data == ','):
-            motor.increase_speed()
-        elif (cmd_data == 'X'):
-            break
+                print ("Reloading target ip for telemetry:"+sensorimotor.ip)          
+            
+            elif (cmd_data == 'Q'):
+                sensesensor = True
+            elif (cmd_data == 'q'):
+                sensesensor = False
+
+            elif (cmd_data == ' '):
+                motor.stop()
+
+            elif (cmd_data == 'd'):
+                motor.move_right()
+            elif (cmd_data == 'a'):
+                motor.move_left()
+            elif (cmd_data == '.'):
+                motor.decrease_speed()
+            elif (cmd_data == ','):
+                motor.increase_speed()
+            elif (cmd_data == 'X'):
+                break
+    except Exception as e:
+        print ("Error:" + str(e))
+        print ("Waiting for serial connection to reestablish...")
+        connection.reconnect()
+
+        # Instruct the Sensorimotor Cortex to stop wandering.
+        sensorimotor.reset()
 
     sys.stdout.flush() # for service to print logs
 
