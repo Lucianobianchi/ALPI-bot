@@ -94,7 +94,16 @@ if system_platform == "Darwin":
 else:
     import H264Streamer as pcs
 
-tgt = -300
+dosomestreaming = True
+
+# Get PiCamera stream and read everything in another thread.
+vst = pcs.H264VideoStreamer()
+if (dosomestreaming):
+    try:
+        vst.startAndConnect()
+        pass
+    except:
+        pass
 
 # Enables the sensor telemetry.  Arduinos will send telemetry data that will be
 #  sent to listening servers.
@@ -155,6 +164,7 @@ fps.tic()
 ts = time.time()
 st = datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d-%H-%M-%S')
 
+# portname='/dev/cu.usbmodem143101'
 connection = SerialConnection()
 motor = MotorCortex(connection = connection)
 # Connect remotely to any client that is waiting for sensor loggers.
@@ -255,6 +265,7 @@ while(True):
 
     sys.stdout.flush() # for service to print logs
 
+vst.keeprunning = False
 sur.keeprunning = False
 
 # When everything done, release the capture

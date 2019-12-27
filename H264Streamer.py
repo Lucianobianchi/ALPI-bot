@@ -24,7 +24,7 @@ class H264VideoStreamer:
             self.thread = threading.Thread(target=self.connect, args=(1,))
         except Exception as e:
             print ("Error:" + e)
-            print ("Error: unable to start thread")
+            print ("Error: unable to start a new thread")
 
     def connectMe(self, server_socket):
         print ("Openning single-client H264 streaming server:"+str(self.videoport))
@@ -62,15 +62,15 @@ class H264VideoStreamer:
 
         doWait = True
         while(doWait):
-            print ('Trying to reconnect....')
+            print ('Restablishing Connection...')
             time.sleep(5)
             try:
                 self.connectMe(server_socket)
                 doWait = False
             except KeyboardInterrupt:
                 doWait = False
-            except:
-                print ('error!!')
+            except Exception as e:
+                print ('Exception:'+str(e))
                 doWait=True
 
         server_socket.close()
