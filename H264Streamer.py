@@ -62,7 +62,7 @@ class H264VideoStreamer:
         server_socket.listen(1)
 
         doWait = True
-        while(doWait):
+        while(doWait and self.keeprunning):
             print ('Restablishing Connection...')
             time.sleep(5)
             try:
