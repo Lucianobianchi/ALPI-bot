@@ -102,8 +102,8 @@ if (dosomestreaming):
     try:
         vst.startAndConnect()
         pass
-    except:
-        pass
+    except Exception as e:
+        print('Error starting H264 stream thread:'+e)
 
 # Enables the sensor telemetry.  Arduinos will send telemetry data that will be
 #  sent to listening servers.

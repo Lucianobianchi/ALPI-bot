@@ -22,6 +22,7 @@ class H264VideoStreamer:
     def startAndConnect(self):
         try:
             self.thread = threading.Thread(target=self.connect, args=(1,))
+            self.thread.start()
         except Exception as e:
             print ("Error:" + e)
             print ("Error: unable to start a new thread")
@@ -55,7 +56,7 @@ class H264VideoStreamer:
                 except:
                     pass
 
-    def connect(self):
+    def connect(self, name):
         server_socket = socket.socket()
         server_socket.bind(('0.0.0.0', self.videoport))
         server_socket.listen(1)
@@ -78,4 +79,6 @@ class H264VideoStreamer:
 
 if __name__ == "__main__":
     vd = H264VideoStreamer()
-    vd.connect()
+    vd.startAndConnect()
+
+    input()
