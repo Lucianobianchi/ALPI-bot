@@ -10,7 +10,7 @@ baudrate = 9600
 TRIES = 10
 
 class SerialConnection(object): 
-  def __init__(self, *, portname):
+  def __init__(self, *, portname=None):
     self.connect(portname)
 
   def connect(self, portname=None):
