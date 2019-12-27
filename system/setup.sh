@@ -6,6 +6,7 @@ sudo cp /tmp/interfaces /etc/network/interfaces
 # Install python 
 sudo apt-get install python-opencv python-serial python-picamera
 
+pip install -r requirements.txt
 
 sudo systemctl status dhcpd.service
 

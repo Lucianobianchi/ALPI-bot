@@ -155,7 +155,7 @@ fps.tic()
 ts = time.time()
 st = datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d-%H-%M-%S')
 
-connection = SerialConnection(portname='/dev/cu.usbmodem143101')
+connection = SerialConnection()
 motor = MotorCortex(connection = connection)
 # Connect remotely to any client that is waiting for sensor loggers.
 sensorimotor = SensorimotorCortex(connection,'sensorimotor',24)

@@ -13,7 +13,7 @@ class SerialConnection(object):
   def __init__(self, *, portname):
     self.connect(portname)
 
-  def connect(self, portname):
+  def connect(self, portname=None):
     self.open = False
     self.ssmr = None
     self.myportname = portname
