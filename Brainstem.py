@@ -20,16 +20,16 @@ from Fps import Fps
 
 # --- Disabling this for now, it was giving me some headaches
 # First create a witness token to guarantee only one instance running
-#  if (os.access("running.wt", os.R_OK)):
-#     print('Another instance is running. Cancelling.')
-#     quit(1)
+if (os.access("running.wt", os.R_OK)):
+    print('Another instance is running. Cancelling.')
+    quit(1)
 
-# runningtoken = open('running.wt', 'w')
-# ts = time.time()
-# st = datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d-%H-%M-%S')
+runningtoken = open('running.wt', 'w')
+ts = time.time()
+st = datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d-%H-%M-%S')
 
-# runningtoken.write(st)
-# runningtoken.close()
+runningtoken.write(st)
+runningtoken.close()
 
 def get_ip_address(ifname):
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -131,7 +131,7 @@ class Surrogator:
             self.message, self.address = self.sock.recvfrom(5)
             self.command = chr(int(self.message[0]))
             self.data = chr(int(self.message[1]))
-            print('Data', self.data)
+            #print('Data', self.data)
             self.controlvalue = int(self.message[2:5])
         except Exception:
             pass
@@ -149,7 +149,8 @@ class Surrogator:
 
 sur = Surrogator(sock)
 
-target = [0,0,0]
+fps = Fps()
+fps.tic()
 
 ts = time.time()
 st = datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d-%H-%M-%S')
@@ -157,9 +158,9 @@ st = datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d-%H-%M-%S')
 connection = SerialConnection(portname='/dev/cu.usbmodem143101')
 motor = MotorCortex(connection = connection)
 # Connect remotely to any client that is waiting for sensor loggers.
-sensorimotor = SensorimotorCortex('sensorimotor',40,'fiiihhhhhhhhhhhh')
+sensorimotor = SensorimotorCortex(connection,'sensorimotor',24)
+sensorimotor.init()
 sensorimotor.start()
-sensorimotor.init(connection)
 sensorimotor.sensorlocalburst=1000
 sensorimotor.sensorburst=100
 sensorimotor.updatefreq=10
@@ -182,6 +183,7 @@ def terminate():
 signal.signal(signal.SIGINT, lambda signum, frame: terminate())
 signal.signal(signal.SIGTERM, lambda signum, frame: terminate())
 
+print('ALPIBot ready.')
 # Live
 while(True):
     try:
@@ -198,22 +200,22 @@ while(True):
 
         # If someone asked for it, send sensor information.
         if (sensesensor):
-            sens = sensorimotor.picksensorsample(ssmr)
-            mots = None
+            sens = sensorimotor.picksensorsample()
 
             if (sens != None):
                 # Check where to put the value
                 sensorimotor.repack([0],[fps.fps])
                 sensorimotor.send(sensorimotor.data)
 
-        if (cmd_data != ''):
-            print(cmd)
-            print(cmd_data)
+        #if (cmd_data != ''):
+        #    print(cmd)
+        #    print(cmd_data)
 
         if (cmd == 'A'):
             if (len(sur.message)==5):
                 # Sending the message that was received.
-                # ssmr.write(sur.message)
+                print(sur.message)
+                connection.send(sur.message)
                 sur.message = ''
 
         elif (cmd == 'U'):

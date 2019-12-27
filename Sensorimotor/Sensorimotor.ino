@@ -29,13 +29,14 @@ void dump(char *msg)
 
 struct sensortype
 {
-  float fps;        // +4 = 4
-  long rightEncoder; // 4
-  long leftEncoder; // 4 
-  float voltage;     // +4 = 8
-  float current;     // +4 = 12
-  int freq;          // +2 = 14
-  int counter;       // +2 = 16
+  float fps;        //  +4 = 4
+  long code;        //  +4 = 8
+  long rightEncoder; // +4 = 12
+  long leftEncoder; //  +4 = 16
+  float voltage;     // +4 = 20
+  float current;     // +4 = 24
+  int freq;          // +2 = 26
+  int counter;       // +2 = 28
 } sensor;
 
 
@@ -128,6 +129,8 @@ void setup() {
   // turn on motor
   leftMotor->run(RELEASE);
 
+  memset(&sensor,0,sizeof(sensor));
+
   setupMotorEncoders();
 }
 
@@ -174,9 +177,10 @@ void loop() {
         break;
       case 'A':
         readcommand(action, controlvalue);
-        Serial.println("ACtion:");Serial.println(action);
+        //Serial.println("Action:");Serial.println(action);
         switch (action) {
           case 0x0b:
+            // Determines the amount of frames to send in a burst.
             setBurstSize(controlvalue);
             state = 0;
             break;
@@ -189,8 +193,15 @@ void loop() {
             state = 0;
             break;
           case 0x0e:
+            // Determines the updating frequency in relation to current arduino frequency (which is variable)
+            // For instance, 1 means the same frequency, 2 means half the frequency: 1/freq
             setUpdateFreq(controlvalue);
             state = 0;
+            break;
+          case 0x0f:
+            setCode(controlvalue);
+            state=0;
+            break;
           default:
             state = action;
             break;

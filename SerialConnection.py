@@ -5,7 +5,6 @@ import os
 
 import datetime
 
-
 baudrate = 9600
 
 TRIES = 10
@@ -17,6 +16,7 @@ class SerialConnection(object):
   def connect(self, portname):
     self.open = False
     self.ssmr = None
+    self.myportname = portname
     tries = 0
     while (tries < TRIES):
       try:
@@ -84,27 +84,32 @@ class SerialConnection(object):
       print ('Did not find serial')
       return [None, None]
 
-  def send(self, bytes):
+  def send(self, data):
     if (self.open):
-      #print(f"Sending via serial: {bytes}")
-      self.ssmr.write(bytes)
+      #print(data)
+      self.ssmr.write(data)
     else:
       print('Warning: serial port not open.')
 
-  def read(self, bytes):
-    self.ssmr.read(bytes)
+  def read(self, length):
+    if (self.open):
+      return self.ssmr.read(length)
+    else:
+      print('Warning: serial port not open.')
+      return None
     
   # There could be a chance that whatever is behind the serial connection get stuck
   # and do not reply anything.  Hence I need a way to break this up (that is what trials is for)
   def readsomething(self, length):
-    data = ''
+    data = b''
     trials = 10000000
 
     while(len(data)<length and trials>0):
         byte = self.ssmr.read(1)
+        #print(byte)
         trials = trials - 1
         if (len(byte)>0):
-            data = data + byte
+            data =  b''.join([data, byte])
 
     return data
 
@@ -127,4 +132,4 @@ class SerialConnection(object):
   def reconnect(self):
     self.flush()
     self.close()
-    self.connect()
+    self.connect(self.myportname)

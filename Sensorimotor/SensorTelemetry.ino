@@ -42,6 +42,10 @@ void setUpdateFreq(int controlvalue)
   updateFreq = controlvalue;
 }
 
+void setCode(int controlvalue)
+{
+  sensor.code = controlvalue;
+}
 
 bool checksensors()
 {
@@ -99,7 +103,7 @@ void payloadsize()
 void payloadstruct()
 {
   char aux[5];
-  strcpy(aux,"fffhh");
+  strcpy(aux,"fiiiffhh");
   Serial.write(aux);
 }
 
