@@ -96,7 +96,7 @@ else:
     import H264Streamer as pcs
     portname = None
 
-dosomestreaming = True
+dosomestreaming = False
 
 # Get PiCamera stream and read everything in another thread.
 vst = pcs.H264VideoStreamer()
@@ -246,6 +246,10 @@ while(True):
             elif (cmd_data == ' '):
                 motor.stop()
 
+            elif (cmd_data == 'w'):
+                motor.move_forward()
+            elif (cmd_data == 's'):
+                motor.move_backwards()
             elif (cmd_data == 'd'):
                 motor.move_right()
             elif (cmd_data == 'a'):
@@ -267,6 +271,7 @@ while(True):
     sys.stdout.flush() # for service to print logs
 
 vst.keeprunning = False
+vst.interrupt()
 sur.keeprunning = False
 
 # When everything done, release the capture
