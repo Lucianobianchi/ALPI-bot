@@ -15,6 +15,8 @@ Adafruit_MotorShield AFMS = Adafruit_MotorShield();
 // Select which 'port' M1, M2, M3 or M4. In this case, M1
 Adafruit_DCMotor *rightMotor = AFMS.getMotor(1);
 Adafruit_DCMotor *leftMotor = AFMS.getMotor(2);
+Adafruit_DCMotor *rightReel = AFMS.getMotor(3);
+Adafruit_DCMotor *leftReel = AFMS.getMotor(4);
 
 bool debug = false;
 char* codeversion="1.0";
@@ -29,14 +31,16 @@ void dump(char *msg)
 
 struct sensortype
 {
-  float fps;        //  +4 = 4
-  long code;        //  +4 = 8
-  long rightEncoder; // +4 = 12
-  long leftEncoder; //  +4 = 16
-  float voltage;     // +4 = 20
-  float current;     // +4 = 24
-  int freq;          // +2 = 26
-  int counter;       // +2 = 28
+  float fps;        //    +4 = 4
+  long code;        //    +4 = 8
+  long rightEncoder; //   +4 = 12
+  long leftEncoder; //    +4 = 16
+  long righReelEncoder;// +4 = 20
+  long leftReelEncoder;// +4 = 24
+  float voltage;     //   +4 = 28
+  float current;     //   +4 = 32
+  int freq;          //   +2 = 34
+  int counter;       //   +2 = 38
 } sensor;
 
 
@@ -85,11 +89,15 @@ int StateMachine(int state, int controlvalue)
       leftMotor->run(BACKWARD); 
       break;  
     case 7:
+      rightReel->setSpeed(controlvalue);
+      rightReel->run(FORWARD);
       //setTargetPos(controlvalue-150);
       break;   
     case 8:
       // Update desired position.
       //pan.tgtPos = controlvalue;
+      leftReel->setSpeed(controlvalue);
+      leftReel->run(FORWARD);
       break;
     case 9:
       //scanner.tgtPos = controlvalue;  
@@ -129,9 +137,20 @@ void setup() {
   // turn on motor
   leftMotor->run(RELEASE);
 
+  leftReel->setSpeed(1);
+  leftReel->run(FORWARD);
+  // turn on motor
+  leftReel->run(RELEASE);
+
+  rightReel->setSpeed(1);
+  rightReel->run(FORWARD);
+  // turn on motor
+  rightReel->run(RELEASE);
+
   memset(&sensor,0,sizeof(sensor));
 
   setupMotorEncoders();
+  setupReelEncoders();
 }
 
 // the loop routine runs over and over again forever:
@@ -222,6 +241,7 @@ void loop() {
   }
 
   loopEncoders();
+  loopReelEncoders();
 
   StateMachine(state,controlvalue);
 
@@ -229,6 +249,12 @@ void loop() {
   //rightMotor->run(FORWARD);
   //leftMotor->setSpeed(30);
   //leftMotor->run(FORWARD); 
+
+//  rightReel->setSpeed(250);
+//  rightReel->run(FORWARD);
+//  leftReel->setSpeed(255);
+//  leftReel->run(FORWARD);
 }
+
 
 

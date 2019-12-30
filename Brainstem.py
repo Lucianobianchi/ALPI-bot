@@ -91,8 +91,10 @@ import platform
 system_platform = platform.system()
 if system_platform == "Darwin":
     import FFMPegStreamer as pcs
+    portname='/dev/cu.usbmodem143101'
 else:
     import H264Streamer as pcs
+    portname = None
 
 dosomestreaming = True
 
@@ -164,8 +166,7 @@ fps.tic()
 ts = time.time()
 st = datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d-%H-%M-%S')
 
-# portname='/dev/cu.usbmodem143101'
-connection = SerialConnection()
+connection = SerialConnection(portname=portname)
 motor = MotorCortex(connection = connection)
 # Connect remotely to any client that is waiting for sensor loggers.
 sensorimotor = SensorimotorCortex(connection,'sensorimotor',24)

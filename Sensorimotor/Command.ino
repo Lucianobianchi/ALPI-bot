@@ -32,3 +32,4 @@ void readcommand(int &state, int &controlvalue)
 }
 
 
+
