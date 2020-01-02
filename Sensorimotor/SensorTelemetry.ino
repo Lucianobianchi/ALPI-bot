@@ -103,7 +103,7 @@ void payloadsize()
 void payloadstruct()
 {
   char aux[5];
-  strcpy(aux,"fiiiffhh");
+  strcpy(aux,"fiiiiiffhh");
   Serial.write(aux);
 }
 

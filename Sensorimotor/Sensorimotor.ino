@@ -40,7 +40,7 @@ struct sensortype
   float voltage;     //   +4 = 28
   float current;     //   +4 = 32
   int freq;          //   +2 = 34
-  int counter;       //   +2 = 38
+  int counter;       //   +2 = 36
 } sensor;
 
 
