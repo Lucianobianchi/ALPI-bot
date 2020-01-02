@@ -28,3 +28,16 @@ sudo systemctl daemon-reload
 
 # You should see the service listed and its status
 sudo service --status-all
+
+
+
+sudo bash ./project-create.sh ALPI-bot
+
+sudo mkdir -p /srv/tmp/
+sudo chgrp -R users /srv/tmp/
+sudo chmod g+w /srv/tmp/
+sudo mkdir -p /srv/www/
+sudo chgrp -R users /srv/www/
+sudo chmod g+w /srv/www/
+
+
