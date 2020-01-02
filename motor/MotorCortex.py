@@ -11,6 +11,8 @@ class MotorCortex:
         self.connection.send(b'A3010')
         self.connection.send(b'A3000')
         self.connection.send(b'A0000')
+        self.connection.send(b'A8000')
+        self.connection.send(b'A7000')
 
     def move_forward(self):
         self.connection.send(bytes('A3'+'{:3d}'.format(self.speed),'ascii'))

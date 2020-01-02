@@ -31,7 +31,7 @@ sudo service --status-all
 
 sudo bash ./project-create.sh ALPI-bot
 
-
+adduser pi users 
 
 sudo mkdir -p /srv/tmp/
 sudo chgrp -R users /srv/tmp/
@@ -40,4 +40,22 @@ sudo mkdir -p /srv/www/
 sudo chgrp -R users /srv/www/
 sudo chmod g+w /srv/www/
 
+cd /srv/git/ALPI-bot.git
+
+sudo chgrp -R users .
+sudo chmod -R g+rwX .
+sudo find . -type d -exec chmod g+s '{}' +
+sudo git config core.sharedRepository group
+
+cd /srv/git/ALPI-bot.git/hooks
+
+sudo touch post-receive
+
+sudo chmod +x post-receive
+
+# This file is created by the script.  Add whatevery you want to the end
+
+# On local workstations
+git remote add deploy ssh://pi@ip/srv/git/ALPI-bot.git/
+git push deploy master
 
