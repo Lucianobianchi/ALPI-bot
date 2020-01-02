@@ -31,6 +31,8 @@ sudo service --status-all
 
 sudo bash ./project-create.sh ALPI-bot
 
+
+
 sudo mkdir -p /srv/tmp/
 sudo chgrp -R users /srv/tmp/
 sudo chmod g+w /srv/tmp/
