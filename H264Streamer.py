@@ -17,7 +17,12 @@ class H264VideoStreamer:
 
     def interrupt(self):
         print ('Interrupting stream h264 server...')
-        self.thread._stop()
+        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        server_address = ('127.0.0.1', self.videoport)
+        sock.connect(server_address)
+        sock.send(b'1')
+        sock.close()
+
 
     def startAndConnect(self):
         try:
