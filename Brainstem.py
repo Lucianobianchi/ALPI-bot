@@ -243,6 +243,12 @@ while(True):
             elif (cmd_data == 'q'):
                 sensesensor = False
 
+
+            elif (cmd_data == 'l'):
+                connection.send(b'A8240')
+            elif (cmd_data == 'k'):
+                connection.send(b'A7240')
+
             elif (cmd_data == ' '):
                 motor.stop()
 

@@ -102,7 +102,7 @@ void payloadsize()
 // FIXME: Modify this.
 void payloadstruct()
 {
-  char aux[5];
+  char aux[10];
   strcpy(aux,"fiiiiiffhh");
   Serial.write(aux);
 }

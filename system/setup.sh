@@ -16,9 +16,15 @@ sudo dhclient wlan0
 sudo raspi-config
 
 # Copy system service.
-sudo cp /tmp/neocortex /etc/init.d/neocortex
+sudo cp neocortex /etc/init.d/neocortex
+
+sudo chmod +x /etc/init.d/neocortex
+sudo update-rc.d neocortex defaults
 
 sudo service neocortex status
 sudo service neocortex start
 
-sudo systemctl daemon-reload neocortex
+sudo systemctl daemon-reload
+
+# You should see the service listed and its status
+sudo service --status-all
