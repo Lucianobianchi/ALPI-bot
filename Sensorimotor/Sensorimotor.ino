@@ -1,5 +1,8 @@
 /**
  * ALPIBot
+ * 
+ * Note that pins A4 and A5 are connected to SDA and SCL for compatibility with classic Arduinos. These pins are not available for use on other processors.
+ *
  */
 
 #include <Wire.h>
@@ -108,7 +111,7 @@ int StateMachine(int state, int controlvalue)
       break;
     default:
       // Do Nothing
-      resetEncoders();
+      //resetEncoders();
       state = 0;
       break;
   }  
@@ -232,7 +235,16 @@ void loop() {
       case 'X':
         stopburst();
         break;
+      case 'r':
+        resetRightReelEncoder();
+        break;
+      case 'l':
+        resetLeftReelEncoder();
+        break;
       case 'P':
+        resetEncoders();
+        break;
+      case 'p':
         //senseCurrentAndVoltage();
         break;
       default:

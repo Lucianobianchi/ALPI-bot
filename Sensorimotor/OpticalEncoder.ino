@@ -11,7 +11,9 @@
  *
  *    A - Digital Pin 2: This is the interrupt pin
  *    B - Digital Pin 4: This is the output b, the encoding signal.
- *
+ *    
+ *    
+ *    
  */
 
 // Pins for the optical encoder inputs.

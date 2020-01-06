@@ -38,8 +38,8 @@ unpackcode='fffffffffffhhhhhhhhhhh'
 length = 40
 unpackcode = 'fiiihhhhhhhhhhhh'
 
-length = 28
-unpackcode = 'fiiiffhh'
+length = 36
+unpackcode = 'fiiiiiffhh'
 
 if (len(sys.argv)>=2):
     print ("Reading which data to shown")

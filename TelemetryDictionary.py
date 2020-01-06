@@ -3,7 +3,9 @@ telemetrydirs = {
   'code':1,
   'rightEncoder':2,
   'leftEncoder':3,
-  'voltage':4,
-  'current':5,
-   'freq':6,
-   'counter':7}
+  'rightReelEncoder':4,
+  'leftReelEncoder':5,
+  'voltage':6,
+  'current':7,
+   'freq':8,
+   'counter':9}

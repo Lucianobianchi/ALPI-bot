@@ -245,9 +245,9 @@ while(True):
 
 
             elif (cmd_data == 'l'):
-                connection.send(b'A8240')
+                connection.send(b'A8200')
             elif (cmd_data == 'k'):
-                connection.send(b'A7240')
+                connection.send(b'A7200')
 
             elif (cmd_data == ' '):
                 motor.stop()

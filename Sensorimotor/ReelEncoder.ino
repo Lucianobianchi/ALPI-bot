@@ -4,9 +4,9 @@
 
 // Pins for the optical encoder inputs.
 // The pin 2 and 3 are the interrupt pins 0 and 1 for Arduino UNO
-#define LH_RENCODER_A 18
+#define LH_RENCODER_A 18 // Connected CLK on 
 #define LH_RENCODER_B 30
-#define RH_RENCODER_A 19
+#define RH_RENCODER_A 19 // Connected CLK
 #define RH_RENCODER_B 31
 
 // variables to store the number of encoder pulses
@@ -28,9 +28,9 @@ void leftReelEncoderEvent() {
     // if the knob is rotating, we need to determine direction
     // We do that by reading pin B.
     if (digitalRead(LH_RENCODER_B) != aLeftVal) {  // Means pin A Changed first - We're Rotating Clockwise
-      leftReelCount ++;
+      leftReelCount --;
     } else {// Otherwise B changed first and we're moving CCW
-      leftReelCount--;
+      leftReelCount++;
     }
   }
   pinALeftLast = aLeftVal; 
@@ -44,9 +44,9 @@ void rightReelEncoderEvent() {
     // if the knob is rotating, we need to determine direction
     // We do that by reading pin B.
     if (digitalRead(RH_RENCODER_B) != aRightVal) {  // Means pin A Changed first - We're Rotating Clockwise
-      rightReelCount--;
-    } else {// Otherwise B changed first and we're moving CCW
       rightReelCount++;
+    } else {// Otherwise B changed first and we're moving CCW
+      rightReelCount--;
     }
   }
   pinARightLast = aRightVal; 
@@ -75,10 +75,20 @@ void loopReelEncoders()
   }
 }
 
+void resetRightReelEncoder()
+{
+  rightReelCount=0;
+}
+
+void resetLeftReelEncoder()
+{
+  leftReelCount = 0;
+}
+
 void resetReelEncoders()
 {
-  leftReelCount = 0; 
-  rightReelCount = 0;
-  
+  resetRightReelEncoder();
+  resetLeftReelEncoder();
 }
+
 
