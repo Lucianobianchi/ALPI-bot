@@ -1,0 +1,317 @@
+#VRML_SIM R2020a utf8
+WorldInfo {
+  info [
+    "Example of use of two Camera devices to produce stereoscopy"
+  ]
+  title "Binocular"
+  basicTimeStep 16
+}
+Viewpoint {
+  orientation 0.38768365280018946 0.8781875991335241 0.2801569668589362 5.2553809744579505
+  position -1.2760760669417872 0.8977125770703244 1.3489695837019389
+  follow "solid"
+  followType "None"
+}
+TexturedBackground {
+}
+TexturedBackgroundLight {
+}
+RectangleArena {
+  floorSize 5 5
+}
+DEF ALPIBOT Robot {
+  children [
+    DEF GPS_SENSORS Group {
+      children [
+        GPS {
+          translation 0 0.075 0
+          name "robot_gps"
+        }
+        GPS {
+          translation 0.095 0.08 0
+          children [
+            Solid {
+              children [
+                DEF REEL_SHAPE Shape {
+                  appearance PBRAppearance {
+                    baseColor 0 1 1
+                    roughness 1
+                    metalness 0
+                  }
+                  geometry Box {
+                    size 0.02 0.02 0.02
+                  }
+                }
+              ]
+              boundingObject USE REEL_SHAPE
+            }
+          ]
+          name "left_gps_sensor"
+        }
+        GPS {
+          translation -0.095 0.08 0
+          children [
+            Solid {
+              children [
+                DEF REEL_SHAPE Shape {
+                  appearance PBRAppearance {
+                    baseColor 0 1 1
+                    roughness 1
+                    metalness 0
+                  }
+                  geometry Box {
+                    size 0.02 0.02 0.02
+                  }
+                }
+              ]
+              boundingObject USE REEL_SHAPE
+            }
+          ]
+          name "right_gps_sensor"
+        }
+      ]
+    }
+    Group {
+      children [
+        Transform {
+          translation 0 0 -0.24
+          children [
+            Solid {
+              translation 0 0.04 0
+              children [
+                Shape {
+                  appearance PBRAppearance {
+                  }
+                  geometry DEF CASTOR_SUPPORT_SHAPE Box {
+                    size 0.05 0.005 0.05
+                  }
+                }
+              ]
+              name "solid(6)"
+              boundingObject USE CASTOR_SUPPORT_SHAPE
+              physics Physics {
+              }
+            }
+            BallJoint {
+              jointParameters BallJointParameters {
+                anchor 0 0.02 0
+              }
+              endPoint Solid {
+                translation 0 0.02 0
+                rotation 0.3231175516806396 0.29805211002834153 -0.8981981894345827 5.038939993767967
+                children [
+                  DEF CASTOR_SPHERE Shape {
+                    appearance PBRAppearance {
+                      roughness 1
+                    }
+                    geometry Sphere {
+                      radius 0.02
+                    }
+                  }
+                ]
+                name "solid(5)"
+                boundingObject USE CASTOR_SPHERE
+                physics Physics {
+                }
+              }
+            }
+          ]
+        }
+        Transform {
+          translation -0.065 0.04 -0.135
+          rotation 0 1 0 4.189
+          children [
+            DEF BLUE_BAR_SOLID Solid {
+              children [
+                Shape {
+                  appearance PBRAppearance {
+                  }
+                  geometry DEF BLUE_BAR_SHAPE Box {
+                    size 0.22 0.005 0.025
+                  }
+                }
+              ]
+              name "solid(3)"
+              boundingObject USE BLUE_BAR_SHAPE
+              physics Physics {
+              }
+            }
+          ]
+        }
+        Transform {
+          translation 0.065 0.04 -0.135
+          rotation 0 1 0 -4.189
+          children [
+            DEF BLUE_BAR_SOLID Solid {
+              children [
+                Shape {
+                  appearance PBRAppearance {
+                  }
+                  geometry DEF BLUE_BAR_SHAPE Box {
+                    size 0.22 0.005 0.025
+                  }
+                }
+              ]
+              name "solid(4)"
+              boundingObject USE BLUE_BAR_SHAPE
+              physics Physics {
+              }
+            }
+          ]
+        }
+      ]
+    }
+    Transform {
+      translation 0.1125 0.0475 0
+      children [
+        Solid {
+          children [
+            DEF WHEEL_BLOCK_SHAPE Shape {
+              appearance PBRAppearance {
+              }
+              geometry Box {
+                size 0.005 0.06 0.08
+              }
+            }
+          ]
+          name "solid(1)"
+          boundingObject USE WHEEL_BLOCK_SHAPE
+          physics Physics {
+          }
+        }
+      ]
+    }
+    Transform {
+      translation -0.1125 0.0475 0
+      children [
+        Solid {
+          children [
+            DEF WHEEL_BLOCK_SHAPE Shape {
+              appearance PBRAppearance {
+              }
+              geometry Box {
+                size 0.005 0.06 0.08
+              }
+            }
+          ]
+          name "solid(2)"
+          boundingObject USE WHEEL_BLOCK_SHAPE
+          physics Physics {
+          }
+        }
+      ]
+    }
+    Transform {
+      translation 0 0.0725 0
+      children [
+        DEF BLUE_BAR_SOLID Solid {
+          children [
+            Shape {
+              appearance PBRAppearance {
+              }
+              geometry DEF BLUE_BAR_SHAPE Box {
+                size 0.22 0.005 0.025
+              }
+            }
+          ]
+          boundingObject USE BLUE_BAR_SHAPE
+          physics Physics {
+          }
+        }
+      ]
+    }
+    HingeJoint {
+      jointParameters HingeJointParameters {
+        anchor -0.11 0.0325 0
+      }
+      device [
+        RotationalMotor {
+          name "right wheel motor"
+          acceleration 1
+        }
+        PositionSensor {
+          name "right wheel sensor"
+        }
+      ]
+      endPoint Solid {
+        translation -0.13 0.0325 0
+        rotation 1 0 0 0
+        children [
+          DEF WHEEL Transform {
+            rotation 0 0 1 1.57
+            children [
+              Shape {
+                appearance PBRAppearance {
+                  baseColor 1 0 0
+                  roughness 1
+                  metalness 0
+                }
+                geometry Cylinder {
+                  height 0.02
+                  radius 0.0325
+                }
+              }
+            ]
+          }
+        ]
+        name "left wheel"
+        boundingObject USE WHEEL
+        physics DEF PHYSICS_WHEEL Physics {
+          density -1
+          mass 0.05
+        }
+      }
+    }
+    HingeJoint {
+      jointParameters HingeJointParameters {
+        anchor 0 0.0325 0
+      }
+      device [
+        RotationalMotor {
+          name "left wheel motor"
+          acceleration 1
+        }
+        PositionSensor {
+          name "left wheel sensor"
+        }
+      ]
+      endPoint Solid {
+        translation 0.13 0.03250000000000003 0
+        rotation 1 0 0 0
+        children [
+          USE WHEEL
+        ]
+        name "right wheel"
+        boundingObject USE WHEEL
+        physics USE PHYSICS_WHEEL
+      }
+    }
+  ]
+  name "ALPIBOT"
+  physics Physics {
+    density -1
+    mass 0.5
+  }
+  controller "rotate_and_go"
+  supervisor TRUE
+}
+DEF FOLLOWING Solid {
+  translation -0.00161108 0.06 0.533971
+  children [
+    Shape {
+      appearance Appearance {
+        material Material {
+          ambientIntensity 0.9
+          diffuseColor 1 0 0
+          emissiveColor 1 0 0
+          shininess 1
+        }
+      }
+      geometry DEF CAPSULE Capsule {
+        height 0.08
+        radius 0.01
+      }
+    }
+  ]
+  boundingObject USE CAPSULE
+}
