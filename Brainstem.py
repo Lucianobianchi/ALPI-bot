@@ -64,19 +64,19 @@ else:
     myip = 'None'
 
 start = time.time()
-print('Multicasting my own IP address: ' + myip)
-while Configuration.broadcast_IP:
-    noticer.send()
-    try:
-        data, address = sock.recvfrom(1)
-        if (len(data) > 0):
-            break
-    except:
-        data = None
+# print('Multicasting my own IP address: ' + myip)
+# while Configuration.broadcast_IP:
+#     noticer.send()
+#     try:
+#         data, address = sock.recvfrom(1)
+#         if (len(data) > 0):
+#             break
+#     except:
+#         data = None
 
-    if (abs(time.time()- start) > 5):
-        print('Giving up broadcasting ip... Lets get started.')
-        break
+#     if (abs(time.time()- start) > 5):
+#         print('Giving up broadcasting ip... Lets get started.')
+#         break
 
 def timeout():
     print ('Sending a multicast update of my own ip address:'+myip)

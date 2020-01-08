@@ -20,17 +20,17 @@ ConfigMe.createconfig("config.ini")
 # Load the configuration file
 lastip = ConfigMe.readconfig("config.ini")
 
-# print("Last ip used:"+lastip)
+print("Last ip used:"+lastip)
 
-# if (len(sys.argv)<2):
-#     print ("Waiting for Multicast Message")
-#     shinkeybotip = reporter.receive()
-#     print ('Bot IP:' + shinkeybotip)
-#     ip = shinkeybotip
-# elif sys.argv[1] == '-f':
-#     print ("Forcing IP Address")
-#     ip = lastip
-# else:
+if (len(sys.argv)<2):
+    print ("Waiting for Multicast Message")
+    shinkeybotip = reporter.receive()
+    print ('Bot IP:' + shinkeybotip)
+    ip = shinkeybotip
+elif sys.argv[1] == '-f':
+    print ("Forcing IP Address")
+    ip = lastip
+else:
 ip = sys.argv[1]
 print ("Using IP:"+ip)
 
