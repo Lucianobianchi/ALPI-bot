@@ -1,6 +1,6 @@
 #coding: latin-1
 import numpy as np
-import cv2
+#import cv2
 import socket
 import sys
 import time
@@ -20,19 +20,19 @@ ConfigMe.createconfig("config.ini")
 # Load the configuration file
 lastip = ConfigMe.readconfig("config.ini")
 
-print("Last ip used:"+lastip)
+# print("Last ip used:"+lastip)
 
-if (len(sys.argv)<2):
-    print ("Waiting for Multicast Message")
-    shinkeybotip = reporter.receive()
-    print ('Bot IP:' + shinkeybotip)
-    ip = shinkeybotip
-elif sys.argv[1] == '-f':
-    print ("Forcing IP Address")
-    ip = lastip
-else:
-    ip = sys.argv[1]
-    print ("Using IP:"+ip)
+# if (len(sys.argv)<2):
+#     print ("Waiting for Multicast Message")
+#     shinkeybotip = reporter.receive()
+#     print ('Bot IP:' + shinkeybotip)
+#     ip = shinkeybotip
+# elif sys.argv[1] == '-f':
+#     print ("Forcing IP Address")
+#     ip = lastip
+# else:
+ip = sys.argv[1]
+print ("Using IP:"+ip)
 
 ConfigMe.setconfig("config.ini","ip",ip)
 server_address = (ip, 10001)
