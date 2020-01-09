@@ -13,7 +13,8 @@ import time
 
 from connection import MCast
 from SerialConnection import SerialConnection
-from motor.MotorCortex import MotorCortex
+from motor.SerialMotor import SerialMotor
+from motor.SerialReel import SerialReel
 from sensors.SensorimotorCortex import SensorimotorCortex
 
 from Fps import Fps
@@ -91,7 +92,7 @@ import platform
 system_platform = platform.system()
 if system_platform == "Darwin":
     import FFMPegStreamer as pcs
-    portname='/dev/cu.usbmodem143101'
+    portname='/dev/cu.usbmodem14101'
 else:
     import H264Streamer as pcs
     portname = None
@@ -167,7 +168,8 @@ ts = time.time()
 st = datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d-%H-%M-%S')
 
 connection = SerialConnection(portname=portname)
-motor = MotorCortex(connection = connection)
+motors = SerialMotor(connection = connection)
+reels = ReelMotor(connection = connection)
 # Connect remotely to any client that is waiting for sensor loggers.
 sensorimotor = SensorimotorCortex(connection,'sensorimotor',24)
 sensorimotor.init()
@@ -184,7 +186,8 @@ def terminate():
     print('Stopping ALPIBot')
     
     try:
-        motor.stop()
+        motors.stop()
+        reels.stop()
     finally:
         os.remove('running.wt')
 
@@ -243,27 +246,26 @@ while(True):
             elif (cmd_data == 'q'):
                 sensesensor = False
 
-
-            elif (cmd_data == 'l'):
-                connection.send(b'A8240')
             elif (cmd_data == 'k'):
-                connection.send(b'A7240')
+                reels.left(100)
+            elif (cmd_data == 'l'):
+                reels.right(100)
 
             elif (cmd_data == ' '):
-                motor.stop()
+                motors.stop()
+                reels.stop()
 
             elif (cmd_data == 'w'):
-                motor.move_forward()
+                motors.both(100)
             elif (cmd_data == 's'):
-                motor.move_backwards()
+                motors.both(-100)
             elif (cmd_data == 'd'):
-                motor.move_right()
+                motors.left(100)
+                motors.right(-100)
             elif (cmd_data == 'a'):
-                motor.move_left()
-            elif (cmd_data == '.'):
-                motor.decrease_speed()
-            elif (cmd_data == ','):
-                motor.increase_speed()
+                motors.left(-100)
+                motors.right(100)
+
             elif (cmd_data == 'X'):
                 break
     except Exception as e:
