@@ -81,10 +81,10 @@ void loopEncoders()
   sensor.rightEncoder = rightCount;
   sensor.leftEncoder = leftCount;  
 
-  if (debug)
-  {
-    Serial.print("L:");Serial.print(leftCount);Serial.print("-R:");Serial.println(rightCount);
-  }
+//  if (debug)
+//  {
+//    Serial.print("L:");Serial.print(leftCount);Serial.print("-R:");Serial.println(rightCount);
+//  }
 }
 
 void resetEncoders()
@@ -93,4 +93,3 @@ void resetEncoders()
   leftCount = 0;
   
 }
-

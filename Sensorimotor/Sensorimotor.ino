@@ -50,68 +50,68 @@ int StateMachine(int state, int controlvalue)
   static int previousState = 0;
   switch (state)
   {
-    case 1:
-      // Left
-      rightMotor->setSpeed(controlvalue);
-      rightMotor->run(FORWARD);
-      leftMotor->setSpeed(controlvalue);
-      leftMotor->run(BACKWARD); 
-      break;
-    case 2:
-      // Right
-      rightMotor->setSpeed(controlvalue);
-      rightMotor->run(BACKWARD);
-      leftMotor->setSpeed(controlvalue);
-      leftMotor->run(FORWARD);
-      break;
-    case 3:
-      rightMotor->setSpeed(controlvalue);
-      rightMotor->run(FORWARD);
+    case 0x01: // left motor forward
       leftMotor->setSpeed(controlvalue);
       leftMotor->run(FORWARD); 
+      break;
+    case 0x02: // right motor forward
+      rightMotor->setSpeed(controlvalue);
+      rightMotor->run(FORWARD);
+      break;
+    case 0x03: // left motor backwards
+      leftMotor->setSpeed(controlvalue);
+      leftMotor->run(BACKWARD); 
       break; 
-    case 4:
+    case 0x04: // right motor backwards
       rightMotor->setSpeed(controlvalue);
       rightMotor->run(BACKWARD);
-      leftMotor->setSpeed(controlvalue);
-      leftMotor->run(BACKWARD); 
       break;   
-    case 5:
+    case 0x05: // both motors forward
       rightMotor->setSpeed(controlvalue);
-      rightMotor->run(BACKWARD);
       leftMotor->setSpeed(controlvalue);
+      rightMotor->run(FORWARD);
       leftMotor->run(FORWARD); 
       break;  
-    case 6:
-      rightMotor->setSpeed(controlvalue);
-      rightMotor->run(FORWARD);
+    case 0x06: // both motors backwards
       leftMotor->setSpeed(controlvalue);
+      rightMotor->setSpeed(controlvalue);
       leftMotor->run(BACKWARD); 
+      rightMotor->run(BACKWARD);
       break;  
-    case 7:
-      rightReel->setSpeed(controlvalue);
-      rightReel->run(FORWARD);
-      //setTargetPos(controlvalue-150);
-      break;   
-    case 8:
-      // Update desired position.
-      //pan.tgtPos = controlvalue;
+    case 0x07: // stop both motors
+      leftMotor->run(RELEASE); 
+      rightMotor->run(RELEASE);
+      break;
+    case 0x0A: // left reel
       leftReel->setSpeed(controlvalue);
       leftReel->run(FORWARD);
+      break;   
+    case 0x0B: // right reel
+      rightReel->setSpeed(controlvalue);
+      rightReel->run(FORWARD);
       break;
-    case 9:
-      //scanner.tgtPos = controlvalue;  
+    case 0x0C: // both reels
+      leftReel->setSpeed(controlvalue);
+      rightReel->setSpeed(controlvalue);
+      rightReel->run(FORWARD);
+      leftReel->run(FORWARD);
       break;
-    case 0x0a:
-      rightMotor->run(RELEASE);
+    case 0x0D: // stop reels
+      leftReel->run(RELEASE);
+      rightReel->run(RELEASE);
+      break;
+    case 0x0F: // stop all motors and reels
       leftMotor->run(RELEASE);
-      break;
+      rightMotor->run(RELEASE);
+      leftReel->run(RELEASE);
+      rightReel->run(RELEASE);
     default:
+      // Serial.print("Noop:"); Serial.println(state);
       // Do Nothing
-      resetEncoders();
       state = 0;
       break;
   }  
+  
   previousState = state;
   return state;
 }
@@ -153,6 +153,33 @@ void setup() {
   setupReelEncoders();
 }
 
+
+int incomingByte = 0;
+
+char buffer[6];
+char actionBuf[3];
+
+void readcommand(int &action, int &controlvalue)
+{
+  // Format ACCNNN, 'A', CC is command, NNN is the controlvalue.
+  memset(buffer, 0, 6);
+  memset(actionBuf, 0, 3);
+  int readbytes = Serial.readBytes(buffer, 5);
+
+  Serial.print("ReadBytes: "); Serial.println(readbytes);
+  if (readbytes == 5) {
+    actionBuf[0] = buffer[0];
+    actionBuf[1] = buffer[1];
+    
+    action = strtol(actionBuf, NULL, 16);
+    controlvalue = atoi(buffer + 2);
+    
+    if (debug) {
+      Serial.print("Action:"); Serial.print(action); Serial.print("|"); Serial.println(controlvalue);
+    }
+  }
+}
+
 // the loop routine runs over and over again forever:
 void loop() {
   unsigned long currentMillis = millis();
@@ -161,28 +188,21 @@ void loop() {
   sensor.fps = 0.0;
 
   int incomingByte;
-
   int action, state, controlvalue;
   
-  if (checksensors())
-  {
+  if (checksensors()) {
     // Put here all the sensor information that you want to do only when you are transmitting the information.
     //senseCurrentAndVoltage();
   }
-  //senseCurrentAndVoltage();
+
   burstsensors();
 
-  incomingByte = 0;//getcommand();
   bool doaction = false;
-
-  if (incomingByte > 0)
-  {
-    doaction = true;
-  }
   
   if (Serial.available() > 0) {
     incomingByte = Serial.read();
     doaction = true;
+    Serial.println("bytes!");
   }
 
   if (doaction) 
@@ -196,31 +216,31 @@ void loop() {
         break;
       case 'A':
         readcommand(action, controlvalue);
-        //Serial.println("Action:");Serial.println(action);
+        Serial.println("Action:"); Serial.println(action);
         switch (action) {
-          case 0x0b:
-            // Determines the amount of frames to send in a burst.
-            setBurstSize(controlvalue);
-            state = 0;
-            break;
-          case 0x0c:
-            payloadsize();
-            state = 0;
-            break;
-          case 0x0d:
-            payloadstruct();
-            state = 0;
-            break;
-          case 0x0e:
-            // Determines the updating frequency in relation to current arduino frequency (which is variable)
-            // For instance, 1 means the same frequency, 2 means half the frequency: 1/freq
-            setUpdateFreq(controlvalue);
-            state = 0;
-            break;
-          case 0x0f:
-            setCode(controlvalue);
-            state=0;
-            break;
+//          case 0x0b:
+//            // Determines the amount of frames to send in a burst.
+//            setBurstSize(controlvalue);
+//            state = 0;
+//            break;
+//          case 0x0c:
+//            payloadsize();
+//            state = 0;
+//            break;
+//          case 0x0d:
+//            payloadstruct();
+//            state = 0;
+//            break;
+//          case 0x0e:
+//            // Determines the updating frequency in relation to current arduino frequency (which is variable)
+//            // For instance, 1 means the same frequency, 2 means half the frequency: 1/freq
+//            setUpdateFreq(controlvalue);
+//            state = 0;
+//            break;
+//          case 0x0f:
+//            setCode(controlvalue);
+//            state=0;
+//            break;
           default:
             state = action;
             break;
@@ -232,9 +252,6 @@ void loop() {
       case 'X':
         stopburst();
         break;
-      case 'P':
-        //senseCurrentAndVoltage();
-        break;
       default:
         break;
     }
@@ -243,18 +260,5 @@ void loop() {
   loopEncoders();
   loopReelEncoders();
 
-  StateMachine(state,controlvalue);
-
-  //rightMotor->setSpeed(30);
-  //rightMotor->run(FORWARD);
-  //leftMotor->setSpeed(30);
-  //leftMotor->run(FORWARD); 
-
-//  rightReel->setSpeed(250);
-//  rightReel->run(FORWARD);
-//  leftReel->setSpeed(255);
-//  leftReel->run(FORWARD);
+  StateMachine(state, controlvalue);
 }
-
-
-

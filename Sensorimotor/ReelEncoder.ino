@@ -69,10 +69,10 @@ void loopReelEncoders()
   sensor.righReelEncoder = rightReelCount;
   sensor.leftReelEncoder = leftReelCount;  
 
-  if (debug)
-  {
-    Serial.print("L:");Serial.print(leftReelCount);Serial.print("-R:");Serial.println(rightReelCount);
-  }
+//  if (debug)
+//  {
+//    Serial.print("L:");Serial.print(leftReelCount);Serial.print("-R:");Serial.println(rightReelCount);
+//  }
 }
 
 void resetReelEncoders()
@@ -81,4 +81,3 @@ void resetReelEncoders()
   rightReelCount = 0;
   
 }
-
