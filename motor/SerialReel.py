@@ -1,4 +1,4 @@
-class SerialMotor:
+class SerialReel:
     def __init__(self, *, connection):
         self.connection = connection
 
@@ -13,4 +13,4 @@ class SerialMotor:
         self.connection.send(bytes('A0C'+'{:3d}'.format(speed), 'ascii'))
 
     def stop(self):
-        self.connection.send(bytes('A0D000')
+        self.connection.send(bytes('A0D000', 'ascii'))

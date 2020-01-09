@@ -169,7 +169,7 @@ st = datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d-%H-%M-%S')
 
 connection = SerialConnection(portname=portname)
 motors = SerialMotor(connection = connection)
-reels = ReelMotor(connection = connection)
+reels = SerialReel(connection = connection)
 # Connect remotely to any client that is waiting for sensor loggers.
 sensorimotor = SensorimotorCortex(connection,'sensorimotor',24)
 sensorimotor.init()
@@ -179,8 +179,8 @@ sensorimotor.sensorburst=100
 sensorimotor.updatefreq=10
 sensorimotor.cleanbuffer()
 
-connection.send(b'AE010')
-connection.send(b'AB100')
+#connection.send(b'AE010')
+#connection.send(b'AB100')
 
 def terminate():
     print('Stopping ALPIBot')

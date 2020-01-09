@@ -22,4 +22,4 @@ class SerialMotor:
             self.connection.send(bytes('A06'+'{:3d}'.format(abs(speed)), 'ascii'))
 
     def stop(self):
-        self.connection.send(bytes('A07000'))
+        self.connection.send(bytes('A07000', 'ascii'))
