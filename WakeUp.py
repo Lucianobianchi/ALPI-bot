@@ -1,3 +1,4 @@
+import Brainstem
 import sys
 import os
 original = sys.stdout
@@ -6,6 +7,4 @@ sys.stdout = out
 sys.stderr = out
 
 if (os.access("running.wt", os.W_OK)):
-    os.remove("running.wt")
-    
-import Brainstem
+  os.remove("running.wt")

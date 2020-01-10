@@ -1,13 +1,10 @@
 import Configuration
-import serial
 import time
 import datetime
 from struct import *
 import struct
 import sys, os, select
 import socket
-import fcntl
-from threading import Timer
 import signal
 import time
 from gpiozero import Button
@@ -19,22 +16,20 @@ from motor.SerialMotor import SerialMotor
 from motor.SerialReel import SerialReel
 from sensors.SensorimotorCortex import SensorimotorCortex
 
-from Fps import Fps
-
 # --- Disabling this for now, it was giving me some headaches
 # First create a witness token to guarantee only one instance running
 # if (os.access("running.wt", os.R_OK)):
 #     print('Another instance is running. Cancelling.')
 #     quit(1)
-# runningtoken = open('running.wt', 'w')
+runningtoken = open('running.wt', 'w')
 
-# ts = time.time()
-# st = datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d-%H-%M-%S')
+ts = time.time()
+st = datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d-%H-%M-%S')
 
-# runningtoken.write(st)
-# runningtoken.close()
+runningtoken.write(st)
+runningtoken.close()
 
-
+### Camera Streaming ###
 import platform
 system_platform = platform.system()
 if system_platform == "Darwin":
@@ -44,7 +39,6 @@ else:
 
 dosomestreaming = False
 
-# Get PiCamera stream and read everything in another thread.
 vst = pcs.H264VideoStreamer()
 if (dosomestreaming):
     try:
@@ -53,24 +47,23 @@ if (dosomestreaming):
     except Exception as e:
         print('Error starting H264 stream thread:'+e)
 
-# Enables the sensor telemetry.  
-# Arduinos will send telemetry data that will be sent to listening servers.
-sensesensor = False
 
-# Initialize UDP Controller Server on port 30001 (BotController)
+### Remote controller server for BotController.py ###
 print('Starting up Controller Server on 0.0.0.0, port 30001')
 server_address = ('0.0.0.0', 30001)
 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 sock.bind(server_address)
 sur = Surrogator(sock)
 
-ts = time.time()
-st = datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d-%H-%M-%S')
-
+### Motors and Reels connections ###
 connection = SerialConnection()
 motors = SerialMotor(connection = connection)
 reels = SerialReel(connection = connection)
 
+### Sensors - Telemetry ###
+# Enables the sensor telemetry.  
+# Arduinos will send telemetry data that will be sent to listening servers.
+sensesensor = False
 # Connect remotely to any client that is waiting for sensor loggers.
 sensorimotor = SensorimotorCortex(connection, 'sensorimotor',24)
 sensorimotor.init()
@@ -80,6 +73,7 @@ sensorimotor.sensorburst=100
 sensorimotor.updatefreq=10
 sensorimotor.cleanbuffer()
 
+### Stop all motors when process is killed ###
 def terminate():
     print('Stopping ALPIBot')
     
@@ -95,6 +89,7 @@ def terminate():
 signal.signal(signal.SIGINT, lambda signum, frame: terminate())
 signal.signal(signal.SIGTERM, lambda signum, frame: terminate())
 
+### Hardware buttons ###
 RED_BUTTON = Button(2)
 BLUE_BUTTON = Button(3)
 
@@ -104,6 +99,7 @@ RED_BUTTON.when_released = lambda: reels.stop()
 BLUE_BUTTON.when_pressed = lambda: reels.both(200)
 BLUE_BUTTON.when_released = lambda: reels.stop()
 
+### Control Loop ###
 print('ALPIBot ready to follow!')
 # Live
 while(True):
@@ -167,7 +163,7 @@ while(True):
 
             elif (cmd_data == 'X'):
                 break
-                
+
     except Exception as e:
         print ("Error:" + str(e))
         print ("Waiting for serial connection to reestablish...")

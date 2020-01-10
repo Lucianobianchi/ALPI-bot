@@ -1,9 +1,9 @@
-#coding: latin-1
+# coding: latin-1
 
 # Run me with frameworkpython
 
-# This program receives telemetry information from ShinkeyBot in real time
-# You only need to send the Q command and data will start flushing.
+#  This program receives telemetry information from ShinkeyBot in real time
+#  You only need to send the Q command and data will start flushing.
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -13,7 +13,8 @@ import time
 import datetime
 from struct import *
 
-import sys, select
+import sys
+import select
 
 import socket
 import Configuration
@@ -33,7 +34,7 @@ length = 26
 unpackcode = 'hhffffhhh'
 
 length = 66
-unpackcode='fffffffffffhhhhhhhhhhh'
+unpackcode = 'fffffffffffhhhhhhhhhhh'
 
 length = 40
 unpackcode = 'fiiihhhhhhhhhhhh'
@@ -41,45 +42,45 @@ unpackcode = 'fiiihhhhhhhhhhhh'
 length = 28
 unpackcode = 'fiiiffhh'
 
-if (len(sys.argv)>=2):
-    print ("Reading which data to shown")
-    try:
-        data1 = int(sys.argv[1])
-        data2 = int(sys.argv[2])
-        data3 = int(sys.argv[3])
-    except:
-        data1 = telemetrydirs[sys.argv[1]]
-        data2 = telemetrydirs[sys.argv[2]]
-        data3 = telemetrydirs[sys.argv[3]]
+if (len(sys.argv) >= 2):
+  print("Reading which data to shown")
+  try:
+    data1 = int(sys.argv[1])
+    data2 = int(sys.argv[2])
+    data3 = int(sys.argv[3])
+  except:
+    data1 = telemetrydirs[sys.argv[1]]
+    data2 = telemetrydirs[sys.argv[2]]
+    data3 = telemetrydirs[sys.argv[3]]
 
-if (len(sys.argv)>=5):
-    min = int(sys.argv[4])
-    max = int(sys.argv[5])
+if (len(sys.argv) >= 5):
+  min = int(sys.argv[4])
+  max = int(sys.argv[5])
 
-if (len(sys.argv)>=7):
-    length = int(sys.argv[6])
-    unpackcode = sys.argv[7]
+if (len(sys.argv) >= 7):
+  length = int(sys.argv[6])
+  unpackcode = sys.argv[7]
 
 
 serialconnected = False
 
 if (not serialconnected):
-    sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    server_address = ('0.0.0.0', Configuration.telemetryport)
-    print ('Starting up on %s port %s' % server_address)
+  sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+  server_address = ('0.0.0.0', Configuration.telemetryport)
+  print('Starting up on %s port %s' % server_address)
 
-    sock.bind(server_address)
+  sock.bind(server_address)
 
 
 def gimmesomething(ser):
-    while True:
-        line = ser.readline()
-        if (len(line)>0):
-            break
-    return line
+  while True:
+    line = ser.readline()
+    if (len(line) > 0):
+      break
+  return line
 
 
-# Sensor Recording
+#  Sensor Recording
 ts = time.time()
 st = datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d-%H-%M-%S')
 f = open('./data/sensor.'+st+'.dat', 'w')
@@ -87,23 +88,23 @@ f = open('./data/sensor.'+st+'.dat', 'w')
 
 if (serialconnected):
 
-    ser = serial.Serial(port='/dev/cu.usbmodem1421', baudrate=9600, timeout=0)
+  ser = serial.Serial(port='/dev/cu.usbmodem1421', baudrate=9600, timeout=0)
 
-    f = open('sensor.dat', 'w')
+  f = open('sensor.dat', 'w')
 
-    ser.write('X')
-    time.sleep(6)
+  ser.write('X')
+  time.sleep(6)
 
-    buf = ser.readline()
-    print (str(buf))
+  buf = ser.readline()
+  print(str(buf))
 
-    buf = ser.readline()
-    print (str(buf))
+  buf = ser.readline()
+  print(str(buf))
 
-    buf = ser.readline()
-    print (str(buf))
+  buf = ser.readline()
+  print(str(buf))
 
-    ser.write('S')
+  ser.write('S')
 
 # You probably won't need this if you're embedding things in a tkinter plot...
 plt.ion()
@@ -115,9 +116,10 @@ z = []
 fig = plt.figure()
 ax = fig.add_subplot(111)
 
-line1, = ax.plot(x,'r', label='X') # Returns a tuple of line objects, thus the comma
-line2, = ax.plot(y,'g', label='Y')
-line3, = ax.plot(z,'b', label='Z')
+# Returns a tuple of line objects, thus the comma
+line1, = ax.plot(x, 'r', label='X')
+line2, = ax.plot(y, 'g', label='Y')
+line3, = ax.plot(z, 'b', label='Z')
 
 ax.axis([0, 500, min, max])
 
@@ -130,9 +132,8 @@ plotx = []
 counter = 0
 
 
-
 if (serialconnected):
-   ser.write('A7180')
+  ser.write('A7180')
 address = ''
 fps = Fps()
 fps.tic()
@@ -140,57 +141,58 @@ while True:
   # read
   fps.steptoc()
   if (serialconnected):
-      ser.write('S')
-      ser.write('P')
-      myByte = ser.read(1)
+    ser.write('S')
+    ser.write('P')
+    myByte = ser.read(1)
   else:
-      myByte = 'S'
+    myByte = 'S'
 
   if myByte == 'S':
-      if (serialconnected):
-         data = ser.read(length) # 24
-         myByte = ser.read(1)
-      else:
-         data, address = sock.recvfrom(length) # 44+26
-         myByte = 'E'
+    if (serialconnected):
+      data = ser.read(length)  # 24
+      myByte = ser.read(1)
+    else:
+      data, address = sock.recvfrom(length)  # 44+26
+      myByte = 'E'
 
-      if myByte == 'E' and len(data)>0 and len(data) == length:
-          # is  a valid message struct
-          new_values = unpack(unpackcode,data)
-          #new_values = unpack('ffffffhhhhhhhhhh'+'hhffffhhh',data)
-          #new_values = unpack('ffffffhhhhhhhhhh', data)
-          print (str(address)+'-'+str(fps.fps)+':'+str(new_values))
-          #print str(new_values[1]) + '\t' + str(new_values[2]) + '\t' + str(new_values[3])
-          f.write( str(new_values[data1]) + ' ' + str(new_values[data2]) + ' ' + str(new_values[data3]) + '\n')
+    if myByte == 'E' and len(data) > 0 and len(data) == length:
+      # is  a valid message struct
+      new_values = unpack(unpackcode, data)
+      #new_values = unpack('ffffffhhhhhhhhhh'+'hhffffhhh',data)
+      #new_values = unpack('ffffffhhhhhhhhhh', data)
+      print(str(address)+'-'+str(fps.fps)+':'+str(new_values))
+      # print str(new_values[1]) + '\t' + str(new_values[2]) + '\t' + str(new_values[3])
+      f.write(str(new_values[data1]) + ' ' + str(new_values[data2]
+                                                 ) + ' ' + str(new_values[data3]) + '\n')
 
-          x.append( float(new_values[data1]))
-          y.append( float(new_values[data2]))
-          z.append( float(new_values[data3]))
+      x.append(float(new_values[data1]))
+      y.append(float(new_values[data2]))
+      z.append(float(new_values[data3]))
 
-          plotx.append( plcounter )
+      plotx.append(plcounter)
 
-          line1.set_ydata(x)
-          line2.set_ydata(y)
-          line3.set_ydata(z)
+      line1.set_ydata(x)
+      line2.set_ydata(y)
+      line3.set_ydata(z)
 
-          line1.set_xdata(plotx)
-          line2.set_xdata(plotx)
-          line3.set_xdata(plotx)
+      line1.set_xdata(plotx)
+      line2.set_xdata(plotx)
+      line3.set_xdata(plotx)
 
-          fig.canvas.draw()
-          plt.pause(0.0000000001)
+      fig.canvas.draw()
+      plt.pause(0.0000000001)
 
-          plcounter = plcounter+1
+      plcounter = plcounter+1
 
-          if plcounter > 500:
-              plcounter = 0
-              plotx[:] = []
-              x[:] = []
-              y[:] = []
-              z[:] = []
+      if plcounter > 500:
+        plcounter = 0
+        plotx[:] = []
+        x[:] = []
+        y[:] = []
+        z[:] = []
 
 
 f.close()
 if (serialconnected):
-   ser.close()
-print ('Everything successfully closed.')
+  ser.close()
+print('Everything successfully closed.')
