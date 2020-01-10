@@ -1,15 +1,11 @@
-#coding: latin-1
 import serial
 import time
 import datetime
 from struct import *
 import os
-
 import socket
 import sys
-
 import Configuration
-
 
 class SensorimotorCortex:
     def __init__(self, connection, name, length, mapping=''):

@@ -10,9 +10,11 @@ import fcntl
 from threading import Timer
 import signal
 import time
+from gpiozero import Button
 
 from connection import MCast
-from SerialConnection import SerialConnection
+from connection.SerialConnection import SerialConnection
+from connection.Surrogator import Surrogator
 from motor.SerialMotor import SerialMotor
 from motor.SerialReel import SerialReel
 from sensors.SensorimotorCortex import SensorimotorCortex
@@ -21,81 +23,24 @@ from Fps import Fps
 
 # --- Disabling this for now, it was giving me some headaches
 # First create a witness token to guarantee only one instance running
-if (os.access("running.wt", os.R_OK)):
-    print('Another instance is running. Cancelling.')
-    quit(1)
+# if (os.access("running.wt", os.R_OK)):
+#     print('Another instance is running. Cancelling.')
+#     quit(1)
+# runningtoken = open('running.wt', 'w')
 
-runningtoken = open('running.wt', 'w')
-ts = time.time()
-st = datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d-%H-%M-%S')
+# ts = time.time()
+# st = datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d-%H-%M-%S')
 
-runningtoken.write(st)
-runningtoken.close()
-
-def get_ip_address(ifname):
-    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    try:
-        # doesn't even have to be reachable
-        s.connect(('10.255.255.255', 1))
-        IP = s.getsockname()[0]
-    except:
-        IP = '127.0.0.1'
-    finally:
-        s.close()
-    return IP
-
-# Initialize UDP Controller Server on port 10001 (BotController)
-sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-server_address = ('0.0.0.0', 10001)
-print('Starting up Controller Server on '+server_address[0])
-sock.bind(server_address)
-
-if (Configuration.broadcast_IP):
-    sock.setblocking(0)
-    sock.settimeout(0.01)
-
-noticer = MCast.Sender()
-
-# Fixme push the network name inside the configuration file.
-myip = get_ip_address('wlan0')
-
-if (len(myip)>0):
-    myip = myip
-else:
-    myip = 'None'
-
-start = time.time()
-# print('Multicasting my own IP address: ' + myip)
-# while Configuration.broadcast_IP:
-#     noticer.send()
-#     try:
-#         data, address = sock.recvfrom(1)
-#         if (len(data) > 0):
-#             break
-#     except:
-#         data = None
-
-#     if (abs(time.time()- start) > 5):
-#         print('Giving up broadcasting ip... Lets get started.')
-#         break
-
-def timeout():
-    print ('Sending a multicast update of my own ip address:'+myip)
-    noticer.send()
-
-if (Configuration.broadcast_IP):
-    sock.setblocking(1)
-    sock.settimeout(0)
+# runningtoken.write(st)
+# runningtoken.close()
 
 
 import platform
 system_platform = platform.system()
 if system_platform == "Darwin":
     import FFMPegStreamer as pcs
-    portname='/dev/cu.usbmodem14101'
 else:
     import H264Streamer as pcs
-    portname = None
 
 dosomestreaming = False
 
@@ -108,79 +53,32 @@ if (dosomestreaming):
     except Exception as e:
         print('Error starting H264 stream thread:'+e)
 
-# Enables the sensor telemetry.  Arduinos will send telemetry data that will be
-#  sent to listening servers.
+# Enables the sensor telemetry.  
+# Arduinos will send telemetry data that will be sent to listening servers.
 sensesensor = False
 
-class Surrogator:
-    def __init__(self, sock):
-        print ('Remote controlling ALPIBot')
-        self.data = ''
-        self.message = ''
-        self.controlvalue = 0
-        self.command = ''
-        self.sock = sock
-        self.address = None
-        self.keeprunning = True
-
-    def getdata(self):
-        return self.data
-
-    def getcommand(self):
-        self.data = ''
-        try:
-            # Read from the UDP controller socket non blocking
-            self.data, self.address = self.sock.recvfrom(1)
-        except Exception:
-            pass
-
-    def getmessage(self):
-        self.data = ''
-        self.command = ''
-        try:
-            # Read from the UDP controller socket non blocking
-            # The message format is AANNN
-            self.message, self.address = self.sock.recvfrom(5)
-            self.command = chr(int(self.message[0]))
-            self.data = chr(int(self.message[1]))
-            #print('Data', self.data)
-            self.controlvalue = int(self.message[2:5])
-        except Exception:
-            pass
-
-
-    def hookme(self):
-        while (self.keeprunning):
-            nextdata  = ''
-            self.getcommand()
-
-            if (self.data == 'X'):
-                break
-
-        print ('Stopping surrogate...')
-
+# Initialize UDP Controller Server on port 30001 (BotController)
+print('Starting up Controller Server on 0.0.0.0, port 30001')
+server_address = ('0.0.0.0', 30001)
+sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+sock.bind(server_address)
 sur = Surrogator(sock)
-
-fps = Fps()
-fps.tic()
 
 ts = time.time()
 st = datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d-%H-%M-%S')
 
-connection = SerialConnection(portname=portname)
+connection = SerialConnection()
 motors = SerialMotor(connection = connection)
 reels = SerialReel(connection = connection)
+
 # Connect remotely to any client that is waiting for sensor loggers.
-sensorimotor = SensorimotorCortex(connection,'sensorimotor',24)
+sensorimotor = SensorimotorCortex(connection, 'sensorimotor',24)
 sensorimotor.init()
 sensorimotor.start()
 sensorimotor.sensorlocalburst=1000
 sensorimotor.sensorburst=100
 sensorimotor.updatefreq=10
 sensorimotor.cleanbuffer()
-
-#connection.send(b'AE010')
-#connection.send(b'AB100')
 
 def terminate():
     print('Stopping ALPIBot')
@@ -197,14 +95,19 @@ def terminate():
 signal.signal(signal.SIGINT, lambda signum, frame: terminate())
 signal.signal(signal.SIGTERM, lambda signum, frame: terminate())
 
-print('ALPIBot ready.')
+RED_BUTTON = Button(2)
+BLUE_BUTTON = Button(3)
+
+RED_BUTTON.when_pressed = lambda: motors.stop()
+RED_BUTTON.when_released = lambda: reels.stop()
+
+BLUE_BUTTON.when_pressed = lambda: reels.both(200)
+BLUE_BUTTON.when_released = lambda: reels.stop()
+
+print('ALPIBot ready to follow!')
 # Live
 while(True):
     try:
-        fps.steptoc()
-        ts = int(time.time())
-        #runninglog.write(str(ts) + ',' + str(fps.fps) + '\n')
-        #print "Estimated frames per second: {0}".format(fps.fps)
         data = ''
         # TCP/IP server is configured as non-blocking
         sur.getmessage()
@@ -220,10 +123,6 @@ while(True):
                 # Check where to put the value
                 sensorimotor.repack([0],[fps.fps])
                 sensorimotor.send(sensorimotor.data)
-
-        #if (cmd_data != ''):
-        #    print(cmd)
-        #    print(cmd_data)
 
         if (cmd == 'A'):
             if (len(sur.message)==5):
@@ -268,6 +167,7 @@ while(True):
 
             elif (cmd_data == 'X'):
                 break
+                
     except Exception as e:
         print ("Error:" + str(e))
         print ("Waiting for serial connection to reestablish...")

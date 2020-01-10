@@ -35,7 +35,7 @@ ip = sys.argv[1]
 print ("Using IP:"+ip)
 
 ConfigMe.setconfig("config.ini","ip",ip)
-server_address = (ip, 10001)
+server_address = (ip, 30001)
 
 def _find_getch():
     try:
