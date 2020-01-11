@@ -1,9 +1,12 @@
+import platform
 import Configuration
 import time
 import datetime
 from struct import *
 import struct
-import sys, os, select
+import sys
+import os
+import select
 import socket
 import signal
 import time
@@ -30,22 +33,21 @@ runningtoken.write(st)
 runningtoken.close()
 
 ### Camera Streaming ###
-import platform
 system_platform = platform.system()
 if system_platform == "Darwin":
-    import FFMPegStreamer as pcs
+  import FFMPegStreamer as pcs
 else:
-    import H264Streamer as pcs
+  import H264Streamer as pcs
 
 dosomestreaming = False
 
 vst = pcs.H264VideoStreamer()
 if (dosomestreaming):
-    try:
-        vst.startAndConnect()
-        pass
-    except Exception as e:
-        print('Error starting H264 stream thread:'+e)
+  try:
+    vst.startAndConnect()
+    pass
+  except Exception as e:
+    print('Error starting H264 stream thread:'+e)
 
 
 ### Remote controller server for BotController.py ###
@@ -57,34 +59,37 @@ sur = Surrogator(sock)
 
 ### Motors and Reels connections ###
 connection = SerialConnection()
-motors = SerialMotor(connection = connection)
-reels = SerialReel(connection = connection)
+motors = SerialMotor(connection=connection)
+reels = SerialReel(connection=connection)
 
 ### Sensors - Telemetry ###
-# Enables the sensor telemetry.  
+# Enables the sensor telemetry.
 # Arduinos will send telemetry data that will be sent to listening servers.
 sensesensor = False
 # Connect remotely to any client that is waiting for sensor loggers.
-sensorimotor = SensorimotorCortex(connection, 'sensorimotor',24)
+sensorimotor = SensorimotorCortex(connection, 'sensorimotor', 24)
 sensorimotor.init()
 sensorimotor.start()
-sensorimotor.sensorlocalburst=1000
-sensorimotor.sensorburst=100
-sensorimotor.updatefreq=10
+sensorimotor.sensorlocalburst = 1000
+sensorimotor.sensorburst = 100
+sensorimotor.updatefreq = 10
 sensorimotor.cleanbuffer()
 
 ### Stop all motors when process is killed ###
-def terminate():
-    print('Stopping ALPIBot')
-    
-    try:
-        motors.stop()
-        reels.stop()
-    finally:
-        os.remove('running.wt')
 
-    print ('ALPIBot has stopped.')
-    exit(0)
+
+def terminate():
+  print('Stopping ALPIBot')
+
+  try:
+    motors.stop()
+    reels.stop()
+  finally:
+    os.remove('running.wt')
+
+  print('ALPIBot has stopped.')
+  exit(0)
+
 
 signal.signal(signal.SIGINT, lambda signum, frame: terminate())
 signal.signal(signal.SIGTERM, lambda signum, frame: terminate())
@@ -103,76 +108,76 @@ BLUE_BUTTON.when_released = lambda: reels.stop()
 print('ALPIBot ready to follow!')
 # Live
 while(True):
-    try:
-        data = ''
-        # TCP/IP server is configured as non-blocking
-        sur.getmessage()
+  try:
+    data = ''
+    # TCP/IP server is configured as non-blocking
+    sur.getmessage()
 
-        cmd = sur.command
-        cmd_data, address = sur.data, sur.address
+    cmd = sur.command
+    cmd_data, address = sur.data, sur.address
 
-        # If someone asked for it, send sensor information.
-        if (sensesensor):
-            sens = sensorimotor.picksensorsample()
+    # If someone asked for it, send sensor information.
+    if (sensesensor):
+      sens = sensorimotor.picksensorsample()
 
-            if (sens != None):
-                # Check where to put the value
-                sensorimotor.repack([0],[fps.fps])
-                sensorimotor.send(sensorimotor.data)
+      if (sens != None):
+        # Check where to put the value
+        sensorimotor.repack([0], [fps.fps])
+        sensorimotor.send(sensorimotor.data)
 
-        if (cmd == 'A'):
-            if (len(sur.message)==5):
-                # Sending the message that was received.
-                print(sur.message)
-                connection.send(sur.message)
-                sur.message = ''
+    if (cmd == 'A'):
+      if (len(sur.message) == 5):
+        # Sending the message that was received.
+        print(sur.message)
+        connection.send(sur.message)
+        sur.message = ''
 
-        elif (cmd == 'U'):
-            # Activate/Deactivate sensor data.
-            if (cmd_data == '!'):
-                # IP Address exchange.
-                sensorimotor.ip = address[0]
-                sensorimotor.restart()
+    elif (cmd == 'U'):
+      # Activate/Deactivate sensor data.
+      if (cmd_data == '!'):
+        # IP Address exchange.
+        sensorimotor.ip = address[0]
+        sensorimotor.restart()
 
-                print ("Reloading target ip for telemetry:"+sensorimotor.ip)          
-            
-            elif (cmd_data == 'Q'):
-                sensesensor = True
-            elif (cmd_data == 'q'):
-                sensesensor = False
+        print("Reloading target ip for telemetry:"+sensorimotor.ip)
 
-            elif (cmd_data == 'k'):
-                reels.left(100)
-            elif (cmd_data == 'l'):
-                reels.right(100)
+      elif (cmd_data == 'Q'):
+        sensesensor = True
+      elif (cmd_data == 'q'):
+        sensesensor = False
 
-            elif (cmd_data == ' '):
-                motors.stop()
-                reels.stop()
+      elif (cmd_data == 'k'):
+        reels.left(100)
+      elif (cmd_data == 'l'):
+        reels.right(100)
 
-            elif (cmd_data == 'w'):
-                motors.both(100)
-            elif (cmd_data == 's'):
-                motors.both(-100)
-            elif (cmd_data == 'd'):
-                motors.left(100)
-                motors.right(-100)
-            elif (cmd_data == 'a'):
-                motors.left(-100)
-                motors.right(100)
+      elif (cmd_data == ' '):
+        motors.stop()
+        reels.stop()
 
-            elif (cmd_data == 'X'):
-                break
+      elif (cmd_data == 'w'):
+        motors.both(100)
+      elif (cmd_data == 's'):
+        motors.both(-100)
+      elif (cmd_data == 'd'):
+        motors.left(100)
+        motors.right(-100)
+      elif (cmd_data == 'a'):
+        motors.left(-100)
+        motors.right(100)
 
-    except Exception as e:
-        print ("Error:" + str(e))
-        print ("Waiting for serial connection to reestablish...")
-        connection.reconnect()
+      elif (cmd_data == 'X'):
+        break
 
-        # Instruct the Sensorimotor Cortex to stop wandering.
-        sensorimotor.reset()
+  except Exception as e:
+    print("Error:" + str(e))
+    print("Waiting for serial connection to reestablish...")
+    connection.reconnect()
 
-    sys.stdout.flush() # for service to print logs
+    # Instruct the Sensorimotor Cortex to stop wandering.
+    sensorimotor.reset()
+
+  sys.stdout.flush()  # for service to print logs
 
 vst.keeprunning = False
 vst.interrupt()
