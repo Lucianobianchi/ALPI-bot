@@ -28,9 +28,9 @@ void leftReelEncoderEvent() {
     // if the knob is rotating, we need to determine direction
     // We do that by reading pin B.
     if (digitalRead(LH_RENCODER_B) != aLeftVal) {  // Means pin A Changed first - We're Rotating Clockwise
-      leftReelCount ++;
-    } else {// Otherwise B changed first and we're moving CCW
       leftReelCount--;
+    } else {// Otherwise B changed first and we're moving CCW
+      leftReelCount ++;
     }
   }
   pinALeftLast = aLeftVal; 
@@ -44,9 +44,9 @@ void rightReelEncoderEvent() {
     // if the knob is rotating, we need to determine direction
     // We do that by reading pin B.
     if (digitalRead(RH_RENCODER_B) != aRightVal) {  // Means pin A Changed first - We're Rotating Clockwise
-      rightReelCount--;
-    } else {// Otherwise B changed first and we're moving CCW
       rightReelCount++;
+    } else {// Otherwise B changed first and we're moving CCW
+      rightReelCount--;
     }
   }
   pinARightLast = aRightVal; 
@@ -66,13 +66,8 @@ void setupReelEncoders()
 
 void loopReelEncoders()
 {
-  sensor.righReelEncoder = rightReelCount;
+  sensor.rightReelEncoder = rightReelCount;
   sensor.leftReelEncoder = leftReelCount;  
-
-//  if (debug)
-//  {
-//    Serial.print("L:");Serial.print(leftReelCount);Serial.print("-R:");Serial.println(rightReelCount);
-//  }
 }
 
 void resetReelEncoders()

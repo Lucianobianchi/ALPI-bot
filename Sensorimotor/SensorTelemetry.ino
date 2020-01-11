@@ -1,139 +1,105 @@
 #define MAX_SIZE_SENSOR_BURST 100
 
-int fps()
-{
-  static int freqValue = 200;
-  static int freqCounter = 0;
-  static unsigned long myPreviousMillis = millis();
-  unsigned long myCurrentMillis = 0;
+/* Returns the amount of loops the arduino made in the last second */
+long frequency() {
+  static unsigned long lastFreqValue = 0;
+  static unsigned long freqCounter = 0;
+  static unsigned long prevMillis = millis();
 
-  myCurrentMillis = millis();
+  unsigned long currMillis = millis();
 
-  if ((myCurrentMillis - myPreviousMillis) > 1000)
-  {
-    if (debug)
-    {
-      Serial.print("Frequency:"); Serial.println(freqCounter);
-    }
-    myPreviousMillis = myCurrentMillis;
-    freqValue = freqCounter;
+  if (currMillis - prevMillis > 1000) {
+    prevMillis = currMillis;
+    lastFreqValue = freqCounter;
     freqCounter = 0;
-  }
-  else
-  {
+  } else {
     freqCounter++;
   }
-  return freqValue;
+  
+  return lastFreqValue;
 }
 
 bool sensorburst = false;
-int transmittedCounter = 0;
+unsigned long transmittedCounter = 0;
 int burstsize = MAX_SIZE_SENSOR_BURST;
 
 int updateFreq = 1;
 
-void setBurstSize(int pburstsize)
-{
-  burstsize = pburstsize;
-}
-
-void setUpdateFreq(int controlvalue) 
-{
-  updateFreq = controlvalue;
-}
-
-void setCode(int controlvalue)
-{
-  sensor.code = controlvalue;
-}
-
-bool checksensors()
-{
-  static int counter = 0;
-  if (counter >= 255)
-  {
-    counter = 0;
-  }
-  sensor.counter = counter++;
-  return (sensorburst);
-
-}
-
-
-void burstsensors() {
-  if (sensorburst)
-  {
-    if (transmittedCounter % updateFreq == 0)
-    {
-      transmitsensors();
-    }
-    transmittedCounter++;
-    if (transmittedCounter >= burstsize || transmittedCounter >= MAX_SIZE_SENSOR_BURST)
-    {
-      sensorburst = false;
-      transmittedCounter = 0;
-    }
+void setBurstSize(int val) {
+  burstsize = min(MAX_SIZE_SENSOR_BURST, val);
+  if (debugSensor) {
+    Serial.print("Burst size set to: "); Serial.println(burstsize);
   }
 }
 
-void startburst()
-{
+void setUpdateFreq(int val) {
+  updateFreq = val;
+  if (debugSensor) {
+    Serial.print("Update frequency set to: "); Serial.println(val);
+  }
+}
+
+void setCode(int val) {
+  sensor.code = val;
+  if (debugSensor) {
+    Serial.print("Code set to: "); Serial.println(val);
+  }
+}
+
+void burstSensors() {
+  if (!sensorburst)
+    return;
+
+  sensor.counter++;
+  transmittedCounter++;
+  
+  if (transmittedCounter % updateFreq == 0) {
+    transmitSensors();
+  }
+  if (transmittedCounter >= burstsize) {
+    stopBurst();
+  }
+}
+
+void startBurst(int val) {
+  if (val != 0)
+    setBurstSize(val);
+    
   sensorburst = true;
+  
   // Reset counter to avoid loosing data.
   transmittedCounter = 0;
+  sensor.counter = 0;
 }
 
-void stopburst()
-{
-  sensorburst = false;  
+void stopBurst() {
+  sensorburst = false;
+  transmittedCounter = 0;
+  sensor.counter = 0;
 }
 
-void payloadsize()
-{
+void sendPayloadSize() {
   int len = sizeof(sensor);
-  char aux[sizeof(int)];  
-  
-  memcpy(&aux,&len,sizeof(int));
-
-  Serial.write((uint8_t *)&aux,sizeof(int));
- 
+  Serial.write(len);
 }
 
-// FIXME: Modify this.
-void payloadstruct()
-{
-  char aux[10];
-  strcpy(aux,"fiiiiiffhh");
-  Serial.write(aux);
-}
-
-void transmitsensors() {
+/* Sends all the sensor data as a payload via Serial */
+void transmitSensors() {
   int len = sizeof(sensor);
-  char aux[len];  //70
-  memcpy(&aux,&sensor,len);
+  char aux[len];
+  memcpy(&aux, &sensor, len);
 
-  if (debug)
-  {
-    Serial.print("Len:");Serial.println(len);
-    Serial.print("Counter:");Serial.println(sensor.counter);
-    Serial.print("Int:");Serial.println(sizeof(int));
-    Serial.print("Long:");Serial.println(sizeof(long));
-    Serial.print("int16_t");Serial.println(sizeof(int16_t));
+  if (debugSensor) {
+    Serial.print("Len:"); Serial.println(len);
+    Serial.print("Counter:"); Serial.println(sensor.counter);
+    Serial.print("Freq:"); Serial.println(sensor.freq);
+    Serial.print("RW:"); Serial.println(sensor.rightEncoder);
+    Serial.print("LW:"); Serial.println(sensor.leftEncoder);
+    Serial.print("RR:"); Serial.println(sensor.rightReelEncoder);
+    Serial.print("LR:"); Serial.println(sensor.leftReelEncoder);
   }
   
-  Serial.write('S');
-  Serial.write((uint8_t *)&aux,len);
-  Serial.write('E');
-
-  if (debug) {
-    Serial.println('S');
-
-  }
-  
-
-  //Aguarda 5 segundos e reinicia o processo
-  //delay(5000);
+  Serial.write('{');
+  Serial.write((uint8_t *) &aux, len);
+  Serial.write('}');
 }
-
-
-

@@ -7,40 +7,28 @@
 #include "utility/Adafruit_MS_PWMServoDriver.h"
 #include <Servo.h>
 
-// Create the motor shield object with the default I2C address
 Adafruit_MotorShield AFMS = Adafruit_MotorShield();
-// Or, create it with a different I2C address (say for stacking)
-// Adafruit_MotorShield AFMS = Adafruit_MotorShield(0x61);
 
-// Select which 'port' M1, M2, M3 or M4. In this case, M1
 Adafruit_DCMotor *rightMotor = AFMS.getMotor(1);
 Adafruit_DCMotor *leftMotor = AFMS.getMotor(2);
-Adafruit_DCMotor *rightReel = AFMS.getMotor(3);
-Adafruit_DCMotor *leftReel = AFMS.getMotor(4);
+Adafruit_DCMotor *rightReel = AFMS.getMotor(4);
+Adafruit_DCMotor *leftReel = AFMS.getMotor(3);
 
 bool debug = false;
-char* codeversion="1.0";
-
-void dump(char *msg)
-{
-  if (true)
-  {
-    Serial.println(msg);
-  }
-}
+bool debugSensor = false;
+String codeversion="1.0";
 
 struct sensortype
 {
-  float fps;        //    +4 = 4
-  long code;        //    +4 = 8
-  long rightEncoder; //   +4 = 12
-  long leftEncoder; //    +4 = 16
-  long righReelEncoder;// +4 = 20
-  long leftReelEncoder;// +4 = 24
-  float voltage;     //   +4 = 28
-  float current;     //   +4 = 32
-  int freq;          //   +2 = 34
-  int counter;       //   +2 = 36
+  long code;
+  long rightEncoder;
+  long leftEncoder;
+  long rightReelEncoder;
+  long leftReelEncoder;
+  float voltage;
+  float current;
+  long freq;
+  long counter;
 } sensor;
 
 
@@ -106,7 +94,6 @@ int StateMachine(int state, int controlvalue)
       leftReel->run(RELEASE);
       rightReel->run(RELEASE);
     default:
-      // Serial.print("Noop:"); Serial.println(state);
       // Do Nothing
       state = 0;
       break;
@@ -121,7 +108,7 @@ void setup() {
   // initialize serial communication at 9600 bits per second:
   Serial.begin(9600);
   Serial.print("AlpiBot v");Serial.println(codeversion);
-  stopburst();
+  stopBurst();
     
   AFMS.begin();  // create with the default frequency 1.6KHz
   //AFMS.begin(1000);  // OR with a different frequency, say 1KHz
@@ -147,7 +134,7 @@ void setup() {
   // turn on motor
   rightReel->run(RELEASE);
 
-  memset(&sensor,0,sizeof(sensor));
+  memset(&sensor, 0, sizeof(sensor));
 
   setupMotorEncoders();
   setupReelEncoders();
@@ -166,7 +153,6 @@ void readcommand(int &action, int &controlvalue)
   memset(actionBuf, 0, 3);
   int readbytes = Serial.readBytes(buffer, 5);
 
-  Serial.print("ReadBytes: "); Serial.println(readbytes);
   if (readbytes == 5) {
     actionBuf[0] = buffer[0];
     actionBuf[1] = buffer[1];
@@ -183,77 +169,61 @@ void readcommand(int &action, int &controlvalue)
 // the loop routine runs over and over again forever:
 void loop() {
   unsigned long currentMillis = millis();
-  
-  sensor.freq = fps();
-  sensor.fps = 0.0;
-
   int incomingByte;
   int action, state, controlvalue;
   
-  if (checksensors()) {
-    // Put here all the sensor information that you want to do only when you are transmitting the information.
-    //senseCurrentAndVoltage();
-  }
-
-  burstsensors();
+  sensor.freq = frequency();
+  burstSensors();
 
   bool doaction = false;
   
   if (Serial.available() > 0) {
     incomingByte = Serial.read();
     doaction = true;
-    Serial.println("bytes!");
   }
 
   if (doaction) 
   {
     switch (incomingByte) {
-      case 'I':
-        dump("SSMR");
-        break;  
       case 'D':
         debug = (!debug);
         break;
-      case 'A':
+      case 'C': 
+        debugSensor = (!debugSensor);
+        break;
+      case 'A': // motor controls
         readcommand(action, controlvalue);
-        Serial.println("Action:"); Serial.println(action);
+        state = action; // let StateMachine process the action
+        break;
+      case 'S': // sensor controls
+        readcommand(action, controlvalue);
+        state = 0;
         switch (action) {
-//          case 0x0b:
-//            // Determines the amount of frames to send in a burst.
-//            setBurstSize(controlvalue);
-//            state = 0;
-//            break;
-//          case 0x0c:
-//            payloadsize();
-//            state = 0;
-//            break;
-//          case 0x0d:
-//            payloadstruct();
-//            state = 0;
-//            break;
-//          case 0x0e:
-//            // Determines the updating frequency in relation to current arduino frequency (which is variable)
-//            // For instance, 1 means the same frequency, 2 means half the frequency: 1/freq
-//            setUpdateFreq(controlvalue);
-//            state = 0;
-//            break;
-//          case 0x0f:
-//            setCode(controlvalue);
-//            state=0;
-//            break;
-          default:
-            state = action;
+          case 0x01:
+            startBurst(controlvalue);
+            break;
+          case 0x02:
+            stopBurst();
+            break;
+          case 0x1A:
+            // Determines the amount of frames to send in a burst.
+            setBurstSize(controlvalue);
+            break;
+          case 0x1B:
+            // Determines the updating frequency in relation to current arduino frequency (which is variable)
+            // For instance, 1 means the same frequency, 2 means half the frequency: 1/freq
+            setUpdateFreq(controlvalue);
+            break;
+          case 0x1C:
+            setCode(controlvalue);
+            break;
+          case 0x21:
+            sendPayloadSize();
+            break;
+          case 0x22:
+            transmitSensors();
             break;
         }
-        break;
-      case 'S':
-        startburst();
-        break;
-      case 'X':
-        stopburst();
-        break;
-      default:
-        break;
     }
   }
 
@@ -261,4 +231,11 @@ void loop() {
   loopReelEncoders();
 
   StateMachine(state, controlvalue);
+
+  if (debug) {
+      Serial.print("RW:"); Serial.println(sensor.rightEncoder);
+      Serial.print("LW:"); Serial.println(sensor.leftEncoder);
+      Serial.print("RR:"); Serial.println(sensor.rightReelEncoder);
+      Serial.print("LR:"); Serial.println(sensor.leftReelEncoder);
+  }
 }
