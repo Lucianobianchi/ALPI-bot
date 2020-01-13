@@ -96,4 +96,4 @@ class SerialConnection(object):
   def reconnect(self):
     self.flush()
     self.close()
-    self.connect(self.myportname)
+    self.connect()

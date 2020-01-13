@@ -13,11 +13,11 @@ import time
 from gpiozero import Button
 
 from connection import MCast
-from connection.SerialConnection import SerialConnection
-from connection.Surrogator import Surrogator
-from motor.SerialMotor import SerialMotor
-from motor.SerialReel import SerialReel
-from sensors.SensorimotorCortex import SensorimotorCortex
+from connection import SerialConnection
+from connection import Surrogator
+from telemetry import TelemetryLoader
+from motor import SerialMotor
+from motor import SerialReel
 
 # --- Disabling this for now, it was giving me some headaches
 # First create a witness token to guarantee only one instance running
@@ -53,6 +53,7 @@ if dosomestreaming:
 print('Starting up Controller Server on 0.0.0.0, port 30001')
 server_address = ('0.0.0.0', 30001)
 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+sock.setblocking(0)
 sock.bind(server_address)
 sur = Surrogator(sock)
 
@@ -62,17 +63,7 @@ motors = SerialMotor(connection=connection)
 reels = SerialReel(connection=connection)
 
 ### Sensors - Telemetry ###
-# Enables the sensor telemetry.
-# Arduinos will send telemetry data that will be sent to listening servers.
-sensesensor = False
-# Connect remotely to any client that is waiting for sensor loggers.
-sensorimotor = SensorimotorCortex(connection, 'sensorimotor', 24)
-sensorimotor.init()
-sensorimotor.start()
-sensorimotor.sensorlocalburst = 1000
-sensorimotor.sensorburst = 100
-sensorimotor.updatefreq = 10
-sensorimotor.cleanbuffer()
+sensors = TelemetryLoader(connection)
 
 ### Stop all motors when process is killed ###
 def terminate():
@@ -103,6 +94,7 @@ BLUE_BUTTON.when_released = reels.stop
 
 ### Control Loop ###
 print('ALPIBot ready to follow!')
+autonomous = False
 # Live
 while True:
   try:
@@ -112,16 +104,7 @@ while True:
 
     cmd = sur.command
     cmd_data, address = sur.data, sur.address
-
-    # If someone asked for it, send sensor information.
-    if sensesensor:
-      sens = sensorimotor.picksensorsample()
-
-      if (sens != None):
-        # Check where to put the value
-        sensorimotor.repack([0], [fps.fps])
-        sensorimotor.send(sensorimotor.data)
-
+    
     if cmd == 'A':
       if (len(sur.message) == 5):
         # Sending the message that was received.
@@ -130,23 +113,23 @@ while True:
         sur.message = ''
 
     elif cmd == 'U':
-      # Activate/Deactivate sensor data.
-      if cmd_data == '!':
-        # IP Address exchange.
-        sensorimotor.ip = address[0]
-        sensorimotor.restart()
+      if cmd_data == 'M':
+        autonomous = not autonomous
+        if autonomous:
+          print('Auto mode: ON')
+        else:
+          print('Auto mode: OFF')
 
-        print("Reloading target ip for telemetry:"+sensorimotor.ip)
-
-      elif cmd_data == 'Q':
-        sensesensor = True
-      elif cmd_data == 'q':
-        sensesensor = False
-
-      elif cmd_data == 'k':
-        reels.left(100)
+      if autonomous:
+        continue
+      
+      # Manual commands
+      if cmd_data == 'k':
+        reels.left(200)
       elif cmd_data == 'l':
-        reels.right(100)
+        reels.right(200)
+      elif cmd_data == 'r':
+        reels.both(200)
 
       elif cmd_data == ' ':
         motors.stop()
@@ -162,7 +145,10 @@ while True:
       elif cmd_data == 'a':
         motors.left(-100)
         motors.right(100)
-
+      
+      elif cmd_data == 'p':
+        sdata = sensors.poll(frequency = 1, length = 1)
+        print(sdata)
       elif cmd_data == 'X':
         break
 
@@ -170,9 +156,6 @@ while True:
     print("Error:" + str(err))
     print("Waiting for serial connection to reestablish...")
     connection.reconnect()
-
-    # Instruct the Sensorimotor Cortex to stop wandering.
-    sensorimotor.reset()
 
   sys.stdout.flush()  # for service to print logs
 

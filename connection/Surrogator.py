@@ -31,13 +31,3 @@ class Surrogator:
       self.controlvalue = int(self.message[2:5])
     except Exception:
       pass
-
-  def hookme(self):
-    while (self.keeprunning):
-      nextdata = ''
-      self.getcommand()
-
-      if (self.data == 'X'):
-        break
-
-    print('Stopping surrogate...')
