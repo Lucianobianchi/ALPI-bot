@@ -42,10 +42,9 @@ else:
 dosomestreaming = False
 
 vst = pcs.H264VideoStreamer()
-if (dosomestreaming):
+if dosomestreaming:
   try:
     vst.startAndConnect()
-    pass
   except Exception as e:
     print('Error starting H264 stream thread:'+e)
 
@@ -76,8 +75,6 @@ sensorimotor.updatefreq = 10
 sensorimotor.cleanbuffer()
 
 ### Stop all motors when process is killed ###
-
-
 def terminate():
   print('Stopping ALPIBot')
 
@@ -98,16 +95,16 @@ signal.signal(signal.SIGTERM, lambda signum, frame: terminate())
 RED_BUTTON = Button(2)
 BLUE_BUTTON = Button(3)
 
-RED_BUTTON.when_pressed = lambda: motors.stop()
-RED_BUTTON.when_released = lambda: reels.stop()
+RED_BUTTON.when_pressed = motors.stop
+RED_BUTTON.when_released = reels.stop
 
 BLUE_BUTTON.when_pressed = lambda: reels.both(200)
-BLUE_BUTTON.when_released = lambda: reels.stop()
+BLUE_BUTTON.when_released = reels.stop
 
 ### Control Loop ###
 print('ALPIBot ready to follow!')
 # Live
-while(True):
+while True:
   try:
     data = ''
     # TCP/IP server is configured as non-blocking
@@ -117,7 +114,7 @@ while(True):
     cmd_data, address = sur.data, sur.address
 
     # If someone asked for it, send sensor information.
-    if (sensesensor):
+    if sensesensor:
       sens = sensorimotor.picksensorsample()
 
       if (sens != None):
@@ -125,52 +122,52 @@ while(True):
         sensorimotor.repack([0], [fps.fps])
         sensorimotor.send(sensorimotor.data)
 
-    if (cmd == 'A'):
+    if cmd == 'A':
       if (len(sur.message) == 5):
         # Sending the message that was received.
         print(sur.message)
         connection.send(sur.message)
         sur.message = ''
 
-    elif (cmd == 'U'):
+    elif cmd == 'U':
       # Activate/Deactivate sensor data.
-      if (cmd_data == '!'):
+      if cmd_data == '!':
         # IP Address exchange.
         sensorimotor.ip = address[0]
         sensorimotor.restart()
 
         print("Reloading target ip for telemetry:"+sensorimotor.ip)
 
-      elif (cmd_data == 'Q'):
+      elif cmd_data == 'Q':
         sensesensor = True
-      elif (cmd_data == 'q'):
+      elif cmd_data == 'q':
         sensesensor = False
 
-      elif (cmd_data == 'k'):
+      elif cmd_data == 'k':
         reels.left(100)
-      elif (cmd_data == 'l'):
+      elif cmd_data == 'l':
         reels.right(100)
 
-      elif (cmd_data == ' '):
+      elif cmd_data == ' ':
         motors.stop()
         reels.stop()
 
-      elif (cmd_data == 'w'):
+      elif cmd_data == 'w':
         motors.both(100)
-      elif (cmd_data == 's'):
+      elif cmd_data == 's':
         motors.both(-100)
-      elif (cmd_data == 'd'):
+      elif cmd_data == 'd':
         motors.left(100)
         motors.right(-100)
-      elif (cmd_data == 'a'):
+      elif cmd_data == 'a':
         motors.left(-100)
         motors.right(100)
 
-      elif (cmd_data == 'X'):
+      elif cmd_data == 'X':
         break
 
-  except Exception as e:
-    print("Error:" + str(e))
+  except Exception as err:
+    print("Error:" + str(err))
     print("Waiting for serial connection to reestablish...")
     connection.reconnect()
 
