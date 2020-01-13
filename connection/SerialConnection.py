@@ -27,13 +27,12 @@ class SerialConnection(object):
     self.open = False
     for t in range(0, TRIES):
       try:
-        self.ser = self.serialcomm(timeout=0)
+        self.ser = self.serialcomm(timeout = 1)
         self.open = True
         print('Opened port ' + str(self.ser))
 
         # Cleanup
-        self.read(1000)
-        self.flush()
+        self.read(100000)
 
         print('Connected to ALPIBot Arduino module')
 
@@ -41,12 +40,11 @@ class SerialConnection(object):
       except Exception as e:
         print('Error while establishing serial connection:' + str(e))
 
-  def serialcomm(self, timeout=0):
+  def serialcomm(self, timeout):
       # Mac
     if system_platform == "Darwin":
       print('Mac environment. Trying port /dev/cu.usbmodem14101...')
-      ser = serial.Serial(port='/dev/cu.usbmodem14101',
-                          baudrate=baudrate, timeout=timeout)
+      ser = serial.Serial(port='/dev/cu.usbmodem14101', baudrate=baudrate, timeout=timeout)
     # Raspberry
     else:
       print('Raspi environment. Trying ports /dev/ttyACM...')
@@ -85,13 +83,6 @@ class SerialConnection(object):
         data = b''.join([data, byte])
 
     return data
-
-  def gimmesomething(self):
-    while True:
-      line = self.ser.readline()
-      if (len(line) > 0):
-        break
-    return line
 
   def flush(self):
     self.ser.flush()

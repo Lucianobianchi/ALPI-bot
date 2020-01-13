@@ -1,5 +1,5 @@
 import platform
-import Configuration
+
 import time
 import datetime
 from struct import *
