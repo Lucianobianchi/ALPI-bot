@@ -4,8 +4,6 @@
 
 #include <Wire.h>
 #include <Adafruit_MotorShield.h>
-#include "utility/Adafruit_MS_PWMServoDriver.h"
-#include <Servo.h>
 
 Adafruit_MotorShield AFMS = Adafruit_MotorShield();
 
@@ -31,7 +29,12 @@ struct sensortype
   long counter;
 } sensor;
 
-
+struct botStateType {
+  long leftSpeed;
+  long rightSpeed;
+  long reelSpeed;
+  long lastReelTime;
+} botState;
 
 int StateMachine(int state, int controlvalue)
 {
@@ -39,36 +42,28 @@ int StateMachine(int state, int controlvalue)
   switch (state)
   {
     case 0x01: // left motor forward
-      leftMotor->setSpeed(controlvalue);
-      leftMotor->run(FORWARD); 
+      moveLeft(controlvalue);
       break;
     case 0x02: // right motor forward
-      rightMotor->setSpeed(controlvalue);
-      rightMotor->run(FORWARD);
+      moveRight(controlvalue);
       break;
     case 0x03: // left motor backwards
-      leftMotor->setSpeed(controlvalue);
-      leftMotor->run(BACKWARD); 
+      moveLeft(-controlvalue);
       break; 
     case 0x04: // right motor backwards
-      rightMotor->setSpeed(controlvalue);
-      rightMotor->run(BACKWARD);
+      moveRight(-controlvalue);
       break;   
     case 0x05: // both motors forward
-      rightMotor->setSpeed(controlvalue);
-      leftMotor->setSpeed(controlvalue);
-      rightMotor->run(FORWARD);
-      leftMotor->run(FORWARD); 
+      moveRight(controlvalue);
+      moveLeft(controlvalue);
       break;  
     case 0x06: // both motors backwards
-      leftMotor->setSpeed(controlvalue);
-      rightMotor->setSpeed(controlvalue);
-      leftMotor->run(BACKWARD); 
-      rightMotor->run(BACKWARD);
+      moveRight(-controlvalue);
+      moveLeft(-controlvalue);
       break;  
     case 0x07: // stop both motors
-      leftMotor->run(RELEASE); 
-      rightMotor->run(RELEASE);
+      stopLeft();
+      stopRight();
       break;
     case 0x0A: // left reel
       leftReel->setSpeed(controlvalue);
@@ -83,16 +78,21 @@ int StateMachine(int state, int controlvalue)
       rightReel->setSpeed(controlvalue);
       rightReel->run(FORWARD);
       leftReel->run(FORWARD);
+      botState.reelSpeed = controlvalue;
       break;
     case 0x0D: // stop reels
       leftReel->run(RELEASE);
       rightReel->run(RELEASE);
+      botState.reelSpeed = 0;
       break;
     case 0x0F: // stop all motors and reels
       leftMotor->run(RELEASE);
       rightMotor->run(RELEASE);
       leftReel->run(RELEASE);
       rightReel->run(RELEASE);
+      botState.leftSpeed = 0;
+      botState.rightSpeed = 0;
+      botState.reelSpeed = 0;
     default:
       // Do Nothing
       state = 0;
@@ -135,7 +135,8 @@ void setup() {
   rightReel->run(RELEASE);
 
   memset(&sensor, 0, sizeof(sensor));
-
+  memset(&botState, 0, sizeof(botState));
+  
   setupMotorEncoders();
   setupReelEncoders();
 }
@@ -231,6 +232,8 @@ void loop() {
   loopReelEncoders();
 
   StateMachine(state, controlvalue);
+
+  reelsMotors();
 
   if (debug) {
       Serial.print("RW:"); Serial.println(sensor.rightEncoder);
