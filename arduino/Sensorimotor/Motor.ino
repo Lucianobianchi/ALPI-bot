@@ -1,14 +1,13 @@
-#define REEL_WAIT_TIME 500
-#define REEL_RETRACT_TIME 300
-#define REEL_RETRACT_SPEED 200
-#define AUTO_RETRACT true
+#define REEL_WAIT_TIME 300
+#define REEL_RETRACT_TIME 500
 
 bool retracting = false;
 
+void setReelsSpeed(long speed) {
+  botState.reelSpeed = speed;
+}
+
 void reelsMotors() {
-  if (!AUTO_RETRACT)
-    return;
-    
   static unsigned long lastReelStart = millis();
   static unsigned long lastReelEnd = millis();
 
@@ -44,8 +43,8 @@ void reelsMotors() {
   lastRightPulses = sensor.rightReelEncoder;
 
   if (retracting) {
-    leftReel->setSpeed(REEL_RETRACT_SPEED);
-    rightReel->setSpeed(REEL_RETRACT_SPEED);
+    leftReel->setSpeed(botState.reelSpeed);
+    rightReel->setSpeed(botState.reelSpeed);
     rightReel->run(FORWARD);
     leftReel->run(FORWARD);
   } else {
@@ -73,7 +72,7 @@ void stopRight() {
 void move(Adafruit_DCMotor * motor, int speed) {
   if (motor == rightMotor)
     botState.rightSpeed = speed;
-  else 
+  else
     botState.leftSpeed = speed;
 
   if (speed == 0) {
@@ -84,6 +83,27 @@ void move(Adafruit_DCMotor * motor, int speed) {
       motor->run(FORWARD);
     } else {
       motor->run(BACKWARD);
+    }
+  }    
+}
+
+void stopReels() {
+  moveReels(0);
+}
+
+void moveReels(int speed) {
+  if (speed == 0) {
+    leftReel->run(RELEASE);
+    rightReel->run(RELEASE);
+  } else {
+    leftReel->setSpeed(speed);
+    rightReel->setSpeed(speed);
+    if (speed > 0) {
+      rightReel->run(FORWARD);
+      leftReel->run(FORWARD);    
+    } else {
+      rightReel->run(BACKWARD);
+      leftReel->run(BACKWARD);
     }
   }    
 }

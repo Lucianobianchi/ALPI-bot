@@ -14,6 +14,7 @@ Adafruit_DCMotor *leftReel = AFMS.getMotor(3);
 
 bool debug = false;
 bool debugSensor = false;
+bool autoretract = false;
 String codeversion="1.0";
 
 struct sensortype
@@ -33,7 +34,6 @@ struct botStateType {
   long leftSpeed;
   long rightSpeed;
   long reelSpeed;
-  long lastReelTime;
 } botState;
 
 int StateMachine(int state, int controlvalue)
@@ -74,25 +74,15 @@ int StateMachine(int state, int controlvalue)
       rightReel->run(FORWARD);
       break;
     case 0x0C: // both reels
-      leftReel->setSpeed(controlvalue);
-      rightReel->setSpeed(controlvalue);
-      rightReel->run(FORWARD);
-      leftReel->run(FORWARD);
-      botState.reelSpeed = controlvalue;
+      moveReels(controlvalue);
       break;
     case 0x0D: // stop reels
-      leftReel->run(RELEASE);
-      rightReel->run(RELEASE);
-      botState.reelSpeed = 0;
+      stopReels();
       break;
     case 0x0F: // stop all motors and reels
-      leftMotor->run(RELEASE);
-      rightMotor->run(RELEASE);
-      leftReel->run(RELEASE);
-      rightReel->run(RELEASE);
-      botState.leftSpeed = 0;
-      botState.rightSpeed = 0;
-      botState.reelSpeed = 0;
+      stopRight();
+      stopLeft();
+      stopReels();
     default:
       // Do Nothing
       state = 0;
@@ -112,35 +102,24 @@ void setup() {
     
   AFMS.begin();  // create with the default frequency 1.6KHz
   //AFMS.begin(1000);  // OR with a different frequency, say 1KHz
+  
+  moveLeft(1);
+  stopLeft();
 
-  // Set the speed to start, from 0 (off) to 255 (max speed)
-  rightMotor->setSpeed(1);
-  rightMotor->run(FORWARD);
-  // turn on motor
-  rightMotor->run(RELEASE);
+  moveRight(1);
+  stopRight();
 
-  leftMotor->setSpeed(1);
-  leftMotor->run(FORWARD);
-  // turn on motor
-  leftMotor->run(RELEASE);
-
-  leftReel->setSpeed(1);
-  leftReel->run(FORWARD);
-  // turn on motor
-  leftReel->run(RELEASE);
-
-  rightReel->setSpeed(1);
-  rightReel->run(FORWARD);
-  // turn on motor
-  rightReel->run(RELEASE);
+  moveReels(1);
+  stopReels();
 
   memset(&sensor, 0, sizeof(sensor));
   memset(&botState, 0, sizeof(botState));
+
+  botState.reelSpeed = 100;
   
   setupMotorEncoders();
   setupReelEncoders();
 }
-
 
 int incomingByte = 0;
 
@@ -192,6 +171,11 @@ void loop() {
       case 'C': 
         debugSensor = (!debugSensor);
         break;
+      case 'R':
+        autoretract = (!autoretract);
+        if (!autoretract)
+          stopReels();
+        break;
       case 'A': // motor controls
         readcommand(action, controlvalue);
         state = action; // let StateMachine process the action
@@ -218,6 +202,9 @@ void loop() {
           case 0x1C:
             setCode(controlvalue);
             break;
+          case 0x1D: 
+            setReelsSpeed(controlvalue);
+            break;
           case 0x21:
             sendPayloadSize();
             break;
@@ -233,7 +220,10 @@ void loop() {
 
   StateMachine(state, controlvalue);
 
-  reelsMotors();
+  if (autoretract) {
+    reelsMotors();
+  }
+    
 
   if (debug) {
       Serial.print("RW:"); Serial.println(sensor.rightEncoder);
