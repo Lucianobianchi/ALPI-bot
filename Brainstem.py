@@ -18,7 +18,7 @@ from connection import Surrogator
 from telemetry import TelemetryLoader
 from motor import SerialMotor
 from motor import SerialReel
-
+from control import control_functions
 # --- Disabling this for now, it was giving me some headaches
 # First create a witness token to guarantee only one instance running
 # if (os.access("running.wt", os.R_OK)):
@@ -53,7 +53,10 @@ if dosomestreaming:
 print('Starting up Controller Server on 0.0.0.0, port 30001')
 server_address = ('0.0.0.0', 30001)
 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-sock.setblocking(0)
+
+import fcntl, os
+fcntl.fcntl(sock, fcntl.F_SETFL, os.O_NONBLOCK)
+
 sock.bind(server_address)
 sur = Surrogator(sock)
 
@@ -94,7 +97,7 @@ BLUE_BUTTON.when_released = reels.stop
 
 ### Control Loop ###
 print('ALPIBot ready to follow!')
-autonomous = False
+autonomous = True
 # Live
 while True:
   try:
@@ -104,8 +107,14 @@ while True:
 
     cmd = sur.command
     cmd_data, address = sur.data, sur.address
-    
-    if cmd == 'A':
+
+    if cmd == '' and autonomous:
+      # Autonomous control
+      time.sleep(0.1)
+      sdata = sensors.poll(frequency = 1, length = 1)
+      control_functions.c1(sdata)
+
+    elif cmd == 'A':
       if (len(sur.message) == 5):
         # Sending the message that was received.
         print(sur.message)
@@ -113,49 +122,45 @@ while True:
         sur.message = ''
 
     elif cmd == 'U':
-      if cmd_data == 'M':
+      if cmd_data == 'X':
+        break
+
+      if cmd_data == 'M': # Enable/disable autonomous command
         autonomous = not autonomous
         if autonomous:
           print('Auto mode: ON')
         else:
           print('Auto mode: OFF')
 
-      if autonomous:
-        continue
-      
-      # Manual commands
-      if cmd_data == 'k':
-        reels.left(200)
-      elif cmd_data == 'l':
-        reels.right(200)
-      elif cmd_data == 'r':
-        reels.both(200)
+      else: # Manual commands
+        if cmd_data == 'k':
+          reels.left(200)
+        elif cmd_data == 'l':
+          reels.right(200)
+        elif cmd_data == 'r':
+          reels.both(200)
+        elif cmd_data == 'w':
+          motors.both(100)
+        elif cmd_data == 's':
+          motors.both(-100)
+        elif cmd_data == 'd':
+          motors.left(100)
+          motors.right(-100)
+        elif cmd_data == 'a':
+          motors.left(-100)
+          motors.right(100)
+        elif cmd_data == ' ':
+          motors.stop()
+          reels.stop()
 
-      elif cmd_data == ' ':
-        motors.stop()
-        reels.stop()
-
-      elif cmd_data == 'w':
-        motors.both(100)
-      elif cmd_data == 's':
-        motors.both(-100)
-      elif cmd_data == 'd':
-        motors.left(100)
-        motors.right(-100)
-      elif cmd_data == 'a':
-        motors.left(-100)
-        motors.right(100)
-      
-      elif cmd_data == 'p':
-        sdata = sensors.poll(frequency = 1, length = 1)
-        print(sdata)
-      elif cmd_data == 'X':
-        break
+        elif cmd_data == 'p':
+          sdata = sensors.poll(frequency = 1, length = 1)
+          print(sdata)
 
   except Exception as err:
     print("Error:" + str(err))
-    print("Waiting for serial connection to reestablish...")
-    connection.reconnect()
+    # print("Waiting for serial connection to reestablish...")
+    # connection.reconnect()
 
   sys.stdout.flush()  # for service to print logs
 
