@@ -2,15 +2,12 @@ import platform
 
 import time
 import datetime
-from struct import *
-import struct
 import sys
 import os
-import select
+import serial
 import socket
 import signal
 import time
-from gpiozero import Button
 
 from connection import MCast
 from connection import SerialConnection
@@ -19,6 +16,7 @@ from telemetry import TelemetryLoader
 from motor import SerialMotor
 from motor import SerialReel
 from control import control_functions
+
 # --- Disabling this for now, it was giving me some headaches
 # First create a witness token to guarantee only one instance running
 # if (os.access("running.wt", os.R_OK)):
@@ -71,33 +69,25 @@ sensors = TelemetryLoader(connection)
 ### Stop all motors when process is killed ###
 def terminate():
   print('Stopping ALPIBot')
-
   try:
     motors.stop()
     reels.stop()
   finally:
-    os.remove('running.wt')
-
-  print('ALPIBot has stopped.')
+    print('ALPIBot has stopped.')
   exit(0)
-
 
 signal.signal(signal.SIGINT, lambda signum, frame: terminate())
 signal.signal(signal.SIGTERM, lambda signum, frame: terminate())
 
-### Hardware buttons ###
-RED_BUTTON = Button(2)
-BLUE_BUTTON = Button(3)
-
-RED_BUTTON.when_pressed = motors.stop
-RED_BUTTON.when_released = reels.stop
-
-BLUE_BUTTON.when_pressed = lambda: reels.both(200)
-BLUE_BUTTON.when_released = reels.stop
-
 ### Control Loop ###
 print('ALPIBot ready to follow!')
-autonomous = True
+autonomous = False
+control_strategies = {
+  'follow_and_turn': control_functions.follow_turn,
+  'rotate_and_go': control_functions.rotate_go
+}
+control_strategy = control_strategies['follow_and_turn']
+
 # Live
 while True:
   try:
@@ -108,11 +98,12 @@ while True:
     cmd = sur.command
     cmd_data, address = sur.data, sur.address
 
-    if cmd == '' and autonomous:
+    if autonomous and cmd == '':
       # Autonomous control
       time.sleep(0.1)
       sdata = sensors.poll(frequency = 1, length = 1)
-      control_functions.c1(sdata)
+      [l_s, r_s] = control_strategy(sdata)
+      print([l_s, r_s])
 
     elif cmd == 'A':
       if (len(sur.message) == 5):
@@ -131,6 +122,24 @@ while True:
           print('Auto mode: ON')
         else:
           print('Auto mode: OFF')
+      
+      # Control strategies for autonomous mode
+      if cmd_data == '1':
+        motors.stop()
+        control_strategy = control_strategies['follow_and_turn']
+        print('Control strat: Follow and Turn')
+      elif cmd_data == '2':
+        motors.stop()
+        control_strategy = control_strategies['rotate_and_go']
+        print('Control strat: Rotate and Go')
+
+      if cmd_data == 'R':  # Enable/disable autonomous reels
+        connection.send(bytes('S1D250', 'ascii')) # Set reel speed to 250
+        connection.send(bytes('R00000', 'ascii'))  # Enable auto reels
+        print('Auto Reels toggle')
+
+      if cmd_data == '0':
+        connection.send(bytes('S30000', 'ascii')) # Reset sensors
 
       else: # Manual commands
         if cmd_data == 'k':
@@ -154,15 +163,17 @@ while True:
           reels.stop()
 
         elif cmd_data == 'p':
-          sdata = sensors.poll(frequency = 1, length = 1)
+          sdata = sensors.poll(frequency=1, length=1)
           print(sdata)
-
+  except (OSError, serial.SerialException):
+    print('Serial connection error. Trying to reconnect...')
+    connection.reconnect()
   except Exception as err:
-    print("Error:" + str(err))
-    # print("Waiting for serial connection to reestablish...")
-    # connection.reconnect()
+    print("An error has ocurred:" + str(err))
 
   sys.stdout.flush()  # for service to print logs
+
+terminate()
 
 vst.keeprunning = False
 vst.interrupt()
@@ -170,4 +181,3 @@ sur.keeprunning = False
 
 # When everything done, release the capture
 sock.close()
-terminate()

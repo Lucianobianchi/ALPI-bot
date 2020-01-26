@@ -8,7 +8,7 @@ import datetime
 
 baudrate = 9600
 
-TRIES = 10
+TRIES = 3
 
 system_platform = platform.system()
 if system_platform == "Darwin":
@@ -26,25 +26,25 @@ class SerialConnection(object):
   def connect(self):
     self.open = False
     for t in range(0, TRIES):
-      try:
-        self.ser = self.serialcomm(timeout = 1)
+      self.ser = self.serialcomm(timeout = 1)
+      if self.ser is not None:
         self.open = True
         print('Opened port ' + str(self.ser))
-
-        # Cleanup
-        self.read(100000)
-
+        self.read(100000) # Cleanup
         print('Connected to ALPIBot Arduino module')
+        return True
 
-        break
-      except Exception as e:
-        print('Error while establishing serial connection:' + str(e))
+    print('Could not connect to ALPIBot Arduino module')
+    return False
 
   def serialcomm(self, timeout):
-      # Mac
+    ser = None
+    
+    # Mac
     if system_platform == "Darwin":
       print('Mac environment. Trying port /dev/cu.usbmodem14101...')
       ser = serial.Serial(port='/dev/cu.usbmodem14101', baudrate=baudrate, timeout=timeout)
+    
     # Raspberry
     else:
       print('Raspi environment. Trying ports /dev/ttyACM...')
@@ -53,21 +53,19 @@ class SerialConnection(object):
         if (os.path.exists(port)):
           ser = serial.Serial(port=port, baudrate=baudrate, timeout=timeout)
           break
-        time.sleep(5)
+        time.sleep(0.1)
+    
     return ser
 
   def send(self, data):
-    if self.open:
-      self.ser.write(data)
-    else:
-      print('Warning: serial port not open.')
+    if self.ser is None:
+      raise serial.SerialException('Serial connection not open')
+    return self.ser.write(data)
 
   def read(self, length):
-    if self.open:
-      return self.ser.read(length)
-    else:
-      print('Warning: serial port not open.')
-      return None
+    if self.ser is None:
+      raise serial.SerialException('Serial connection not open')
+    return self.ser.read(length)
 
   # There could be a chance that whatever is behind the serial connection get stuck
   # and do not reply anything.  Hence I need a way to break this up (that is what trials is for)
@@ -85,15 +83,19 @@ class SerialConnection(object):
     return data
 
   def flush(self):
-    self.ser.flush()
-    self.ser.flushInput()
-    self.ser.flushOutput()
+    if self.ser is not None:
+      self.ser.flush()
+      self.ser.flushInput()
+      self.ser.flushOutput()
 
   def close(self):
-    if (not self.ser == None):
+    if self.ser is not None:
       self.ser.close()
 
   def reconnect(self):
-    self.flush()
-    self.close()
-    self.connect()
+    try:
+      self.flush()
+      self.close()
+    finally:
+      self.connect()
+    return self.open # True if succesfully reconnected

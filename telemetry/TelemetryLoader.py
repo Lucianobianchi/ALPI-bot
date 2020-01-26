@@ -45,6 +45,8 @@ class TelemetryLoader:
         data = {k: values[i] for (i, k) in enumerate(TELEMETRY_KEYS)}
         res.append(data)
       else:
+        # TODO: throw exception so that the calling function has to catch it in case 
+        # the serial connection doesn't work
         print('Skipped invalid payload')
 
     return res
