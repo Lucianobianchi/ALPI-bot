@@ -1,7 +1,8 @@
 from controller import Robot, GPS, Supervisor
 import numpy as np
 from scipy.spatial import distance
- 
+import csv
+
 TIME_STEP = 64
 robot = Supervisor()
 
@@ -25,6 +26,11 @@ for i in range(2):
 subject = robot.getFromDef('FOLLOWING')
 subject_t_field = subject.getField('translation')
 
+# Get velocity, get orientation, in case I can use this data
+# bot_node = robot.getFromDef('ALPIBOT')
+# print(bot_node.getOrientation())
+# print(bot_node.getVelocity())
+
 def set_subject_velocity(vel):
     subject.setVelocity(vel + [0, 0, 0])
 
@@ -32,11 +38,20 @@ def set_subject_position(pos):
     subject_t_field.setSFVec3f(pos)
  
 DEBUG = False
+
+RECORD = True
+record_filename = 'sample.csv' 
+if RECORD:
+    record_file = open(record_filename, 'x', newline='\n')
+    record_writer = csv.writer(record_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+    record_writer.writerow(['time', 'd_l', 'd_r', 'llen', 'rlen', 'left_gps_x', 'left_gps_y', 'left_gps_z', \
+    'right_gps_x', 'right_gps_y', 'right_gps_z', 'subject_x', 'subject_y', 'subject_z', 'v_r', 'v_l'])
+
 AUTO_MOVE_SUBJECT = True
 # Subject automoves in a sin wave. A and f are amplitude and frequency of that wave function.
-A = 1.5
-T = 2
-Vz = 1E-5 # Forward velocity of the subject.
+A = 1.2
+T = 4
+Vz = 5E-5 # Forward velocity of the subject.
 x0 = 0
 y0 = 0.06
 z0 = 0.5
@@ -87,5 +102,14 @@ def start(control_strategy):
             print("Vs")
             print(v_l, v_r)
 
+        if RECORD:
+            left_gps = gps_anchors[0].getValues()
+            right_gps = gps_anchors[1].getValues()
+            s_pos = subject.getPosition() 
+            record_writer.writerow([time, d_l, d_r, llen, rlen, left_gps[0], left_gps[1], left_gps[2], \
+            right_gps[0], right_gps[1], right_gps[2], s_pos[0], s_pos[1], s_pos[2], v_l, v_r])
+
         wheels[0].setVelocity(v_l)
         wheels[1].setVelocity(v_r)
+
+    record.close()

@@ -7,8 +7,8 @@ WorldInfo {
   basicTimeStep 16
 }
 Viewpoint {
-  orientation -0.1968075195511992 -0.9441081304449963 -0.2644364541355031 1.5883999632799264
-  position -1.972966678063973 1.1223205865639592 0.2700083598719513
+  orientation 0.23116823821411542 0.9431132679353863 0.23895315332763126 5.016956076357149
+  position -2.526814285255368 1.3711822768817759 1.7442224292054351
   follow "solid"
   followType "None"
 }
@@ -33,7 +33,16 @@ DirectionalLight {
   castShadows TRUE
 }
 RectangleArena {
-  floorSize 5 5
+  floorSize 10 10
+}
+CardboardBox {
+  translation -0.162822 0.3 1.30238
+  size 0.5 0.5 0.5
+}
+CardboardBox {
+  translation -0.194304 0.3 3.33778
+  name "cardboard box(1)"
+  size 0.5 0.5 0.5
 }
 DEF ALPIBOT Robot {
   children [
@@ -115,7 +124,7 @@ DEF ALPIBOT Robot {
               }
               endPoint Solid {
                 translation 0 0.02 0
-                rotation 0.805511122095338 0.29528795026444804 -0.5137673195224955 3.817905845002943
+                rotation 0.9794990285199393 -0.1715928587817197 -0.10553456279158917 2.534973926224499
                 children [
                   DEF CASTOR_SPHERE Shape {
                     appearance PBRAppearance {
@@ -327,7 +336,7 @@ DEF FOLLOWING Solid {
       }
       geometry DEF CAPSULE Capsule {
         height 0.08
-        radius 0.01
+        radius 0.03
       }
     }
   ]
