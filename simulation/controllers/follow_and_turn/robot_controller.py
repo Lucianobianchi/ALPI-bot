@@ -2,6 +2,7 @@ from controller import Robot, GPS, Supervisor
 import numpy as np
 from scipy.spatial import distance
 import csv
+import leader_path
 
 TIME_STEP = 64
 robot = Supervisor()
@@ -39,7 +40,7 @@ def set_subject_position(pos):
  
 DEBUG = False
 
-RECORD = True
+RECORD = False
 record_filename = 'sample.csv' 
 if RECORD:
     record_file = open(record_filename, 'x', newline='\n')
@@ -48,21 +49,12 @@ if RECORD:
     'right_gps_x', 'right_gps_y', 'right_gps_z', 'subject_x', 'subject_y', 'subject_z', 'v_r', 'v_l'])
 
 AUTO_MOVE_SUBJECT = True
-# Subject automoves in a sin wave. A and f are amplitude and frequency of that wave function.
-A = 1.2
-T = 4
-Vz = 5E-5 # Forward velocity of the subject.
 x0 = 0
 y0 = 0.06
 z0 = 0.5
- 
-def get_thread_lengths():
-    tpos = np.array(subject.getPosition())
-    lpos = np.array(gps_anchors[0].getValues())
-    rpos = np.array(gps_anchors[1].getValues())
-    llen = distance.euclidean([lpos[0], lpos[2]], [tpos[0], tpos[2]])
-    rlen = distance.euclidean([rpos[0], rpos[2]], [tpos[0], tpos[2]])
-    return (llen, rlen)
+GERONO_A = 2
+GERONO_N = 4000
+GERONO_TS = leader_path.generate_gerono_lemniscate_t(GERONO_N)
 
 init_r = 0
 init_l = 0
@@ -77,8 +69,11 @@ def start(control_strategy):
 
         time += TIME_STEP
         if AUTO_MOVE_SUBJECT:
-            z = z0 + Vz * time
-            x = x0 + A * np.sin(2 * np.pi * (Vz * time) / T)
+            t = GERONO_TS[time // TIME_STEP]
+            z, x = leader_path.gerono_lemniscate_xy(t, GERONO_A)
+            x = x + x0
+            y = y0
+            z = z + z0
             set_subject_position([x, y0, z])
  
         if DEBUG:
@@ -113,3 +108,11 @@ def start(control_strategy):
         wheels[1].setVelocity(v_r)
 
     record.close()
+
+def get_thread_lengths():
+    tpos = np.array(subject.getPosition())
+    lpos = np.array(gps_anchors[0].getValues())
+    rpos = np.array(gps_anchors[1].getValues())
+    llen = distance.euclidean([lpos[0], lpos[2]], [tpos[0], tpos[2]])
+    rlen = distance.euclidean([rpos[0], rpos[2]], [tpos[0], tpos[2]])
+    return (llen, rlen)

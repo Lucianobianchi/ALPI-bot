@@ -4,7 +4,7 @@ CV = 35
 CR = 10
 BASE_VR = 0.3
 DM_OFFSET = 0.0001
-DT_OFFSET = 0.02
+DT_OFFSET = 0.05
 
 def dmean(d_l, d_r):
     return (d_l + d_r) / 2
