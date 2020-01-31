@@ -7,7 +7,7 @@ import leader_path
 TIME_STEP = 64
 robot = Supervisor()
 
-MAX_WHEEL_SPEED = 9.5
+MAX_WHEEL_SPEED = 19.5
 
 wheels = []
 wheelsNames = ['left wheel motor', 'right wheel motor']
@@ -38,10 +38,10 @@ def set_subject_velocity(vel):
 def set_subject_position(pos):
     subject_t_field.setSFVec3f(pos)
  
-DEBUG = False
+DEBUG = True
 
-RECORD = False
-record_filename = 'sample.csv' 
+RECORD = True
+record_filename = 't01.csv' 
 if RECORD:
     record_file = open(record_filename, 'x', newline='\n')
     record_writer = csv.writer(record_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
@@ -51,9 +51,9 @@ if RECORD:
 AUTO_MOVE_SUBJECT = True
 x0 = 0
 y0 = 0.06
-z0 = 0.5
-GERONO_A = 2
-GERONO_N = 4000
+z0 = 0
+GERONO_A = 4
+GERONO_N = 3000
 GERONO_TS = leader_path.generate_gerono_lemniscate_t(GERONO_N)
 
 init_r = 0
@@ -69,12 +69,13 @@ def start(control_strategy):
 
         time += TIME_STEP
         if AUTO_MOVE_SUBJECT:
-            t = GERONO_TS[time // TIME_STEP]
-            z, x = leader_path.gerono_lemniscate_xy(t, GERONO_A)
-            x = x + x0
-            y = y0
-            z = z + z0
-            set_subject_position([x, y0, z])
+            if time // TIME_STEP < len(GERONO_TS):
+                t = GERONO_TS[time // TIME_STEP]
+                z, x = leader_path.gerono_lemniscate_xy(t, GERONO_A)
+                x = x + x0
+                y = y0
+                z = z + z0
+                set_subject_position([x, y0, z])
  
         if DEBUG:
             print("GPS VALUES")
