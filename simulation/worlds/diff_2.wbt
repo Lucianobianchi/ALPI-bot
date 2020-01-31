@@ -35,7 +35,7 @@ RectangleArena {
   floorSize 10 10
 }
 DEF ALPIBOT Robot {
-  translation -0.350104 0 -0.319077
+  translation -0.370104 0 -0.319077
   rotation 0 1 0 0.787
   children [
     DEF GPS_SENSORS Group {
@@ -116,7 +116,7 @@ DEF ALPIBOT Robot {
               }
               endPoint Solid {
                 translation 0 0.02 0
-                rotation 0.6925550590702586 -0.6824331319960396 0.23377876402758785 4.574035442186716
+                rotation 0.10223290639812306 -0.9754534713899727 -0.19503578646659764 4.716407442029611
                 children [
                   DEF CASTOR_SPHERE Shape {
                     appearance PBRAppearance {

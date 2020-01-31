@@ -41,7 +41,7 @@ def set_subject_position(pos):
 DEBUG = True
 
 RECORD = True
-record_filename = 't01.csv' 
+record_filename = 't03.csv' 
 if RECORD:
     record_file = open(record_filename, 'x', newline='\n')
     record_writer = csv.writer(record_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
