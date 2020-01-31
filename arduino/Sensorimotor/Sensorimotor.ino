@@ -78,11 +78,13 @@ int StateMachine(int state, int controlvalue)
       break;
     case 0x0D: // stop reels
       stopReels();
+      autoretract = false;
       break;
     case 0x0F: // stop all motors and reels
       stopRight();
       stopLeft();
       stopReels();
+      autoretract = false;
     default:
       // Do Nothing
       state = 0;
@@ -210,6 +212,11 @@ void loop() {
             break;
           case 0x22:
             transmitSensors();
+            break;
+          case 0x30:
+            // Reset encoders
+            resetEncoders();
+            resetReelEncoders();
             break;
         }
     }
