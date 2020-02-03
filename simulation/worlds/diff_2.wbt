@@ -7,8 +7,8 @@ WorldInfo {
   basicTimeStep 16
 }
 Viewpoint {
-  orientation 0.24529277856291493 0.9415708454147582 0.23081550175372154 4.713017107950895
-  position -2.1034582736845877 1.27642107802036 0.031431317555847216
+  orientation 0.11934408320082561 0.9856655851449738 0.11924908412969423 4.6987475853186735
+  position -2.3325103306748898 0.7690880396581238 -0.0559045282353047
   follow "ALPIBOT:solid(1)"
 }
 TexturedBackground {
@@ -35,7 +35,7 @@ RectangleArena {
   floorSize 10 10
 }
 DEF ALPIBOT Robot {
-  translation -0.370104 0 -0.319077
+  translation -0.360104 0 -0.319077
   rotation 0 1 0 0.787
   children [
     DEF GPS_SENSORS Group {
@@ -116,7 +116,7 @@ DEF ALPIBOT Robot {
               }
               endPoint Solid {
                 translation 0 0.02 0
-                rotation 0.10223290639812306 -0.9754534713899727 -0.19503578646659764 4.716407442029611
+                rotation -0.8152677444539514 0.006295982773543924 -0.5790499680112949 3.498045657546045
                 children [
                   DEF CASTOR_SPHERE Shape {
                     appearance PBRAppearance {

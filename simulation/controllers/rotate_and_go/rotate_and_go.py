@@ -1,10 +1,10 @@
 import robot_controller
 
-CV = 35
-CR = 10
-BASE_VR = 0.3
+CV = 20
+CR = 20
+BASE_VR = 1.0
 DM_OFFSET = 0.0001
-DT_OFFSET = 0.05
+DT_OFFSET = 0.10
 
 def dmean(d_l, d_r):
     return (d_l + d_r) / 2
