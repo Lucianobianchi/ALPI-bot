@@ -88,6 +88,7 @@ control_strategies = {
 }
 control_strategy = control_strategies['follow_and_turn']
 
+AUTONOMOUS_SLEEP = 0.05
 # Live
 while True:
   try:
@@ -100,9 +101,11 @@ while True:
 
     if autonomous and cmd == '':
       # Autonomous control
-      time.sleep(0.1)
+      time.sleep(AUTONOMOUS_SLEEP)
       sdata = sensors.poll(frequency = 1, length = 1)
       [l_s, r_s] = control_strategy(sdata)
+      motors.left(l_s)
+      motors.right(r_s)
       print([l_s, r_s])
 
     elif cmd == 'A':
@@ -158,6 +161,8 @@ while True:
         elif cmd_data == 'a':
           motors.left(-100)
           motors.right(100)
+        elif cmd_data == 'z':
+          motors.stop()
         elif cmd_data == ' ':
           motors.stop()
           reels.stop()
@@ -169,7 +174,8 @@ while True:
     print('Serial connection error. Trying to reconnect...')
     connection.reconnect()
   except Exception as err:
-    print("An error has ocurred:" + str(err))
+    print("An error has ocurred")
+    print(err)
 
   sys.stdout.flush()  # for service to print logs
 
