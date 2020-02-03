@@ -2,11 +2,12 @@ from controller import Robot, GPS, Supervisor
 import numpy as np
 from scipy.spatial import distance
 import csv
+import leader_path
 
 TIME_STEP = 64
 robot = Supervisor()
 
-MAX_WHEEL_SPEED = 9.5
+MAX_WHEEL_SPEED = 19.5
 
 wheels = []
 wheelsNames = ['left wheel motor', 'right wheel motor']
@@ -37,10 +38,10 @@ def set_subject_velocity(vel):
 def set_subject_position(pos):
     subject_t_field.setSFVec3f(pos)
  
-DEBUG = False
+DEBUG = True
 
 RECORD = True
-record_filename = 'sample.csv' 
+record_filename = 't03.csv' 
 if RECORD:
     record_file = open(record_filename, 'x', newline='\n')
     record_writer = csv.writer(record_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
@@ -48,21 +49,12 @@ if RECORD:
     'right_gps_x', 'right_gps_y', 'right_gps_z', 'subject_x', 'subject_y', 'subject_z', 'v_r', 'v_l'])
 
 AUTO_MOVE_SUBJECT = True
-# Subject automoves in a sin wave. A and f are amplitude and frequency of that wave function.
-A = 1.2
-T = 4
-Vz = 5E-5 # Forward velocity of the subject.
 x0 = 0
 y0 = 0.06
-z0 = 0.5
- 
-def get_thread_lengths():
-    tpos = np.array(subject.getPosition())
-    lpos = np.array(gps_anchors[0].getValues())
-    rpos = np.array(gps_anchors[1].getValues())
-    llen = distance.euclidean([lpos[0], lpos[2]], [tpos[0], tpos[2]])
-    rlen = distance.euclidean([rpos[0], rpos[2]], [tpos[0], tpos[2]])
-    return (llen, rlen)
+z0 = 0
+GERONO_A = 4
+GERONO_N = 3000
+GERONO_TS = leader_path.generate_gerono_lemniscate_t(GERONO_N)
 
 init_r = 0
 init_l = 0
@@ -77,9 +69,13 @@ def start(control_strategy):
 
         time += TIME_STEP
         if AUTO_MOVE_SUBJECT:
-            z = z0 + Vz * time
-            x = x0 + A * np.sin(2 * np.pi * (Vz * time) / T)
-            set_subject_position([x, y0, z])
+            if time // TIME_STEP < len(GERONO_TS):
+                t = GERONO_TS[time // TIME_STEP]
+                z, x = leader_path.gerono_lemniscate_xy(t, GERONO_A)
+                x = x + x0
+                y = y0
+                z = z + z0
+                set_subject_position([x, y0, z])
  
         if DEBUG:
             print("GPS VALUES")
@@ -113,3 +109,11 @@ def start(control_strategy):
         wheels[1].setVelocity(v_r)
 
     record.close()
+
+def get_thread_lengths():
+    tpos = np.array(subject.getPosition())
+    lpos = np.array(gps_anchors[0].getValues())
+    rpos = np.array(gps_anchors[1].getValues())
+    llen = distance.euclidean([lpos[0], lpos[2]], [tpos[0], tpos[2]])
+    rlen = distance.euclidean([rpos[0], rpos[2]], [tpos[0], tpos[2]])
+    return (llen, rlen)

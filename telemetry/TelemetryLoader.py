@@ -23,11 +23,15 @@ TELEMETRY_KEYS = [
 
 PAYLOAD_SIZE = 36
 
+sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+ip = sys.argv[1]
+server_address = ('0.0.0.0', 30002)
+
 class TelemetryLoader:
   def __init__(self, serial_connection):
     self.serial_connection = serial_connection
 
-  def poll(self, *, frequency, length):
+  def poll(self, *, frequency, length, stream = False):
     # Set frequency
     self.serial_connection.send(bytes('S1B'+'{:3d}'.format(frequency), 'ascii'))
 
@@ -45,10 +49,10 @@ class TelemetryLoader:
         data = {k: values[i] for (i, k) in enumerate(TELEMETRY_KEYS)}
         res.append(data)
       else:
-        # TODO: throw exception so that the calling function has to catch it in case 
-        # the serial connection doesn't work
         print('Skipped invalid payload')
 
+    if stream:
+      sock.sendto(bytes('GA123', 'ascii'), server_address)
     return res
   
   def stop(self):

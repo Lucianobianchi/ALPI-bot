@@ -6,37 +6,12 @@ import time
 from connection import MCast
 import os
 
-import ConfigMe
-
 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
-print('Parameters:' + str(sys.argv))
-#  Fetch the remote ip if I do not have one.  It should be multicasted by ShinkeyBot
-reporter = MCast.Receiver()
-
-ConfigMe.createconfig("config.ini")
-
-# Load the configuration file
-# lastip = ConfigMe.readconfig("config.ini")
-
-# print("Last ip used:"+lastip)
-
-# if (len(sys.argv)<2):
-#     print ("Waiting for Multicast Message")
-#     shinkeybotip = reporter.receive()
-#     print ('Bot IP:' + shinkeybotip)
-#     ip = shinkeybotip
-# elif sys.argv[1] == '-f':
-#     print ("Forcing IP Address")
-#     ip = lastip
-# else:
 ip = sys.argv[1]
 print("Using IP:"+ip)
 
-ConfigMe.setconfig("config.ini", "ip", ip)
 server_address = (ip, 30001)
-
-
 def _find_getch():
   try:
     import termios
@@ -80,12 +55,8 @@ while (True):
     sent = sock.sendto(
         bytes('AE'+'{:3d}'.format(newfreq), 'ascii'), server_address)
     sent = sock.sendto(bytes('AB'+'{:3d}'.format(1), 'ascii'), server_address)
-  elif (data.startswith('c')):
-    print('Command:')
-    cmd = sys.stdin.readline()
-    sent = sock.sendto(bytes(cmd, 'ascii'), server_address)
   else:
-    sent = sock.sendto(bytes('U'+data+'000', 'ascii'), server_address)
+  sent = sock.sendto(bytes('U'+data+'000', 'ascii'), server_address)
 
   if (data.startswith('!')):
     print("Letting know Bot that I want streaming....")
@@ -93,7 +64,7 @@ while (True):
   if (data.startswith('X')):
     break
 
-print("Insisting....")
+print("Stopping ALPIBot....")
 for i in range(1, 100):
   sent = sock.sendto(bytes('U'+data+'000', 'ascii'), server_address)
 

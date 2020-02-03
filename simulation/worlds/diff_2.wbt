@@ -7,10 +7,9 @@ WorldInfo {
   basicTimeStep 16
 }
 Viewpoint {
-  orientation 0.23116823821411542 0.9431132679353863 0.23895315332763126 5.016956076357149
-  position -2.526814285255368 1.3711822768817759 1.7442224292054351
-  follow "solid"
-  followType "None"
+  orientation 0.24529277856291493 0.9415708454147582 0.23081550175372154 4.713017107950895
+  position -2.1034582736845877 1.27642107802036 0.031431317555847216
+  follow "ALPIBOT:solid(1)"
 }
 TexturedBackground {
 }
@@ -35,16 +34,9 @@ DirectionalLight {
 RectangleArena {
   floorSize 10 10
 }
-CardboardBox {
-  translation -0.162822 0.3 1.30238
-  size 0.5 0.5 0.5
-}
-CardboardBox {
-  translation -0.194304 0.3 3.33778
-  name "cardboard box(1)"
-  size 0.5 0.5 0.5
-}
 DEF ALPIBOT Robot {
+  translation -0.370104 0 -0.319077
+  rotation 0 1 0 0.787
   children [
     DEF GPS_SENSORS Group {
       children [
@@ -124,7 +116,7 @@ DEF ALPIBOT Robot {
               }
               endPoint Solid {
                 translation 0 0.02 0
-                rotation 0.9794990285199393 -0.1715928587817197 -0.10553456279158917 2.534973926224499
+                rotation 0.10223290639812306 -0.9754534713899727 -0.19503578646659764 4.716407442029611
                 children [
                   DEF CASTOR_SPHERE Shape {
                     appearance PBRAppearance {
@@ -254,7 +246,8 @@ DEF ALPIBOT Robot {
       device [
         RotationalMotor {
           name "right wheel motor"
-          acceleration 1
+          acceleration 3
+          maxVelocity 20
         }
         PositionSensor {
           name "right wheel sensor"
@@ -296,12 +289,13 @@ DEF ALPIBOT Robot {
     }
     HingeJoint {
       jointParameters HingeJointParameters {
-        anchor 0 0.0325 0
+        anchor 0.11 0.0325 0
       }
       device [
         RotationalMotor {
           name "left wheel motor"
-          acceleration 1
+          acceleration 3
+          maxVelocity 20
         }
         PositionSensor {
           name "left wheel sensor"
@@ -328,11 +322,11 @@ DEF ALPIBOT Robot {
   supervisor TRUE
 }
 DEF FOLLOWING Solid {
-  translation 0 0.06 0.5
+  translation 0 0.06 0
   children [
     Shape {
       appearance GlossyPaint {
-        baseColor 1 0 0
+        baseColor 0 0.666667 0
       }
       geometry DEF CAPSULE Capsule {
         height 0.08
