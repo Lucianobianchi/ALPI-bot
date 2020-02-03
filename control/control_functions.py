@@ -14,12 +14,11 @@ def dmean(d_l, d_r):
     return (d_l + d_r) / 2
 
 MAX_SPEED = 10
+MIN_MOTOR_V = 18
 MAX_MOTOR_V = 255
 def to_motor_power(vel):
-  vel = min(vel, MAX_SPEED)
-  if vel < 0:
-    return 0
-  return round((vel / MAX_SPEED) * MAX_MOTOR_V)
+  # vel = min(vel, MAX_SPEED)
+  return round(vel * (MAX_MOTOR_V - MIN_MOTOR_V) / MAX_SPEED) + MIN_MOTOR_V
 
 CV = 10
 CR = 15
