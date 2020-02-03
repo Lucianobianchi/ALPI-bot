@@ -78,7 +78,7 @@ void move(Adafruit_DCMotor * motor, int speed) {
   if (speed == 0) {
     motor->run(RELEASE);
   } else {
-    motor->setSpeed(speed);
+    motor->setSpeed(abs(speed));
     if (speed > 0) {
       motor->run(FORWARD);
     } else {
