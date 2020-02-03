@@ -1,7 +1,7 @@
 import robot_controller
 
 CV = 15
-CR = 5
+CR = 10
 D_OFFSET = 0.0001
 
 def dmean(d_l, d_r):
