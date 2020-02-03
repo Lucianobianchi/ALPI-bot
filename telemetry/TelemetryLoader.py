@@ -1,4 +1,6 @@
+import json
 from struct import unpack
+import socket 
 
 # From Arduino code
 # struct {
@@ -24,8 +26,8 @@ TELEMETRY_KEYS = [
 PAYLOAD_SIZE = 36
 
 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-ip = sys.argv[1]
-server_address = ('0.0.0.0', 30002)
+sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
+server_address = ('<broadcast>', 30002)
 
 class TelemetryLoader:
   def __init__(self, serial_connection):
@@ -52,7 +54,7 @@ class TelemetryLoader:
         print('Skipped invalid payload')
 
     if stream:
-      sock.sendto(bytes('GA123', 'ascii'), server_address)
+      sock.sendto(bytes('T'+json.dumps(res), 'ascii'), server_address)
     return res
   
   def stop(self):

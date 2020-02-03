@@ -88,7 +88,7 @@ control_strategies = {
 }
 control_strategy = control_strategies['follow_and_turn']
 
-sp = 0
+stream_telemetry = False
 AUTONOMOUS_SLEEP = 0.05
 # Live
 while True:
@@ -103,7 +103,7 @@ while True:
     if autonomous and cmd == '':
       # Autonomous control
       time.sleep(AUTONOMOUS_SLEEP)
-      sdata = sensors.poll(frequency = 1, length = 1, stream = True)
+      sdata = sensors.poll(frequency = 1, length = 1, stream = stream_telemetry)
       [l_s, r_s] = control_strategy(sdata)
       motors.left(l_s)
       motors.right(r_s)
@@ -167,17 +167,11 @@ while True:
         elif cmd_data == ' ':
           motors.stop()
           reels.stop()
-        elif cmd_data == '[':
-          sp += 1
-          print(sp)
-          motors.both(sp)
-        elif cmd_data == ']':
-          sp -= 1
-          print(sp)
-          motors.both(sp)
         elif cmd_data == 'p':
-          sdata = sensors.poll(frequency=1, length=1, stream=True)
+          sdata = sensors.poll(frequency=1, length=1, stream=stream_telemetry)
           print(sdata)
+        elif cmd_data == 't':
+          stream_telemetry = not stream_telemetry
   except (OSError, serial.SerialException):
     print('Serial connection error. Trying to reconnect...')
     connection.reconnect()
