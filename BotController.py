@@ -1,5 +1,4 @@
 # coding: latin-1
-import numpy as np
 import socket
 import sys
 import time
@@ -12,6 +11,7 @@ ip = sys.argv[1]
 print("Using IP:"+ip)
 
 server_address = (ip, 30001)
+
 def _find_getch():
   try:
     import termios
@@ -50,12 +50,6 @@ while (True):
     sock.close()
     quit()
 
-  if (data.startswith('f')):
-    newfreq = input('Freq:')
-    sent = sock.sendto(
-        bytes('AE'+'{:3d}'.format(newfreq), 'ascii'), server_address)
-    sent = sock.sendto(bytes('AB'+'{:3d}'.format(1), 'ascii'), server_address)
-  else:
   sent = sock.sendto(bytes('U'+data+'000', 'ascii'), server_address)
 
   if (data.startswith('!')):
