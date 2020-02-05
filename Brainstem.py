@@ -107,7 +107,7 @@ while True:
       [l_s, r_s] = control_strategy(sdata)
       motors.left(l_s)
       motors.right(r_s)
-      print([l_s, r_s])
+      # print([l_s, r_s])
 
     elif cmd == 'A':
       if (len(sur.message) == 5):
@@ -172,6 +172,10 @@ while True:
           print(sdata)
         elif cmd_data == 't':
           stream_telemetry = not stream_telemetry
+          if stream_telemetry:
+            print('Telemetry broadcast: ON')
+          else:
+            print('Telemetry broadcast: OFF')
   except (OSError, serial.SerialException):
     print('Serial connection error. Trying to reconnect...')
     connection.reconnect()
