@@ -8,6 +8,20 @@ import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 from control import distances, follow_turn, rotate_go
 from time import sleep
+import argparse
+import csv
+import time
+
+parser = argparse.ArgumentParser(
+    description='Visualize, process and save telemetry data')
+parser.add_argument('--save', action='store_true')
+parser.add_argument('--filename', dest='filename', type=str,
+                    help='telemetry data record file name')
+args = parser.parse_args()
+print(args)
+if args.save and args.filename is None:
+  print('Choose a filename to save the data with --filename')
+  exit(0)
 
 red_color = 'tab:red'
 blue_color = 'tab:blue'
@@ -58,6 +72,7 @@ sur = Surrogator(sock)
 all_shapes = [l_reel_line, r_reel_line, l_thread_line,
               r_thread_line, left_ft_bar, right_ft_bar, left_rg_bar, right_rg_bar]
 
+
 def init():
   l_reel_axes.set_xlim(0, 25)
   l_reel_axes.set_ylim(-300, 300)
@@ -72,18 +87,31 @@ def init():
   return all_shapes
 
 
+if args.save:
+  record_file = open(args.filename, 'x', newline='\n')
+  record_writer = csv.writer(
+      record_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+  record_writer.writerow(
+      ['time-millis', 'l_reel_enc', 'r_reel_enc', 'd_l', 'd_r'])
+
+
 def update(i):
   try:
     message, address = sock.recvfrom(10000)
     if message != '' and message[0] != 'T':
       data = json.loads(message[1:])
       sensor_datas.append(data[0])
-      # print(data[0])
+
+      if args.save:
+        d_l, d_r = distances(data[0])
+        t = round(time.time() * 1000)
+        record_writer.writerow(
+            [t, data[0]['leftReelEncoder'], data[0]['rightReelEncoder'], d_l, d_r])
 
   except Exception as exc:
     err = exc.args[0]
     if err == errno.EAGAIN or err == errno.EWOULDBLOCK:
-      pass # no data available
+      pass  # no data available
     else:
       print("An error has ocurred")
       print(exc)
@@ -118,6 +146,6 @@ def update(i):
 
 
 ani = animation.FuncAnimation(
-    fig, update, None, init_func=init, interval=30, blit=True)
+    fig, update, None, init_func=init, interval=100, blit=True)
 fig.tight_layout()  # otherwise the right y-label is slightly clipped
 plt.show()
