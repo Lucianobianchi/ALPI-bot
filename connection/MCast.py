@@ -8,7 +8,7 @@
 #   mcast -s -6 (sender, IPv6)
 #   mcast    (receivers, IPv4)
 #   mcast  -6  (receivers, IPv6)
-
+import fcntl, os
 import sys
 import socket
 import struct
@@ -16,7 +16,7 @@ import time
 MYPORT = 8123
 MYGROUP_4 = '225.0.0.250'
 MYGROUP_6 = 'ff15:7079:7468:6f6e:6465:6d6f:6d63:6173'
-MYTTL = 1  # Increase to reach other networks
+MYTTL = 3  # Increase to reach other networks
 
 
 def main():
@@ -34,6 +34,8 @@ class Sender:
     self.addrinfo = socket.getaddrinfo(group, None)[0]
 
     self.s = socket.socket(self.addrinfo[0], socket.SOCK_DGRAM)
+    fcntl.fcntl(self.s, fcntl.F_SETFL, os.O_NONBLOCK)
+
     # Set Time-to-live (optional)
     ttl_bin = struct.pack('@i', MYTTL)
     if self.addrinfo[0] == socket.AF_INET:  # IPv4
@@ -45,7 +47,6 @@ class Sender:
   def send(self):
     data = repr(time.time()).encode('utf-8') + b'\0'
     self.s.sendto(data, (self.addrinfo[4][0], MYPORT))
-    time.sleep(1)
 
 
 class Receiver:

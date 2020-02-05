@@ -20,12 +20,12 @@ MAX_MOTOR_V = 255
 def to_motor_power(vel):
   # Esto no está tan bueno porque si se topean las velocidades de ambos motores el robot no dobla
   if abs(vel) > MAX_SPEED:
-    vel = np.sign(vel) * MAX_SPEED
-  return round(vel * (MAX_MOTOR_V - MIN_MOTOR_V) / MAX_SPEED) + np.sign(vel) * MIN_MOTOR_V
+    vel = int(np.sign(vel) * MAX_SPEED)
+  return round(vel * (MAX_MOTOR_V - MIN_MOTOR_V) / MAX_SPEED) + int(np.sign(vel) * MIN_MOTOR_V)
 
-CV = 10
-CR = 15
-D_OFFSET = 0.0001
+CV = 25
+CR = 35
+D_OFFSET = 0.005
 
 def follow_turn(sensor_data):
   sensor_data = sensor_data[0]
@@ -39,11 +39,11 @@ def follow_turn(sensor_data):
   v_r = vtar - CR * (d_l - d_r)
   return map(to_motor_power, [v_l, v_r])
 
-CV = 35
-CR = 10
-BASE_VR = 0.3
-DM_OFFSET = 0.0001
-DT_OFFSET = 0.05
+CV = 30
+CR = 35
+BASE_VR = 5.0
+DM_OFFSET = 0.005
+DT_OFFSET = 0.04
 
 def rotate_go(sensor_data):
   sensor_data = sensor_data[0]
