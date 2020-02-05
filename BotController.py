@@ -4,10 +4,24 @@ import sys
 import time
 from connection import MCast
 import os
+import argparse
 
 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+reporter = MCast.Receiver()
 
-ip = sys.argv[1]
+parser = argparse.ArgumentParser()
+parser.add_argument('--multicast', '--m', action='store_true')
+args = parser.parse_args()
+print(args)
+if args.multicast:
+  print('Waiting for Multicast message...')
+  bot_ip = reporter.receive()
+  print('Received Multicast message')
+  print('Bot IP:' + bot_ip)
+  ip = bot_ip
+else:
+  ip = sys.argv[1]
+
 print("Using IP:"+ip)
 
 server_address = (ip, 30001)
