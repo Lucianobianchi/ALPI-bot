@@ -24,7 +24,7 @@ def to_motor_power(vel):
   return round(vel * (MAX_MOTOR_V - MIN_MOTOR_V) / MAX_SPEED) + int(np.sign(vel) * MIN_MOTOR_V)
 
 CV = 25
-CR = 35
+CR = 20
 D_OFFSET = 0.005
 
 def follow_turn(sensor_data):
@@ -43,7 +43,7 @@ CV = 30
 CR = 35
 BASE_VR = 5.0
 DM_OFFSET = 0.005
-DT_OFFSET = 0.04
+DT_OFFSET = 0.08
 
 def rotate_go(sensor_data):
   sensor_data = sensor_data[0]
