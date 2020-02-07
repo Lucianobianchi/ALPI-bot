@@ -11,8 +11,8 @@ reporter = MCast.Receiver()
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--multicast', '--m', action='store_true')
-args = parser.parse_args()
-print(args)
+args, _ = parser.parse_known_args()
+
 if args.multicast:
   print('Waiting for Multicast message...')
   bot_ip = reporter.receive()
