@@ -9,7 +9,7 @@ WorldInfo {
 Viewpoint {
   orientation 0.11934408320082561 0.9856655851449738 0.11924908412969423 4.6987475853186735
   position -2.3325103306748898 0.7690880396581238 -0.0559045282353047
-  follow "ALPIBOT:solid(1)"
+  follow "ALPIBOT:solid"
 }
 TexturedBackground {
 }
@@ -116,7 +116,7 @@ DEF ALPIBOT Robot {
               }
               endPoint Solid {
                 translation 0 0.02 0
-                rotation -0.8152677444539514 0.006295982773543924 -0.5790499680112949 3.498045657546045
+                rotation -0.1164826587987737 -0.027730949685222207 0.9928055119854665 3.4846533259500014
                 children [
                   DEF CASTOR_SPHERE Shape {
                     appearance PBRAppearance {

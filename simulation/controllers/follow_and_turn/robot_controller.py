@@ -38,9 +38,9 @@ def set_subject_velocity(vel):
 def set_subject_position(pos):
     subject_t_field.setSFVec3f(pos)
  
-DEBUG = True
+DEBUG = False
 
-RECORD = True
+RECORD = False
 record_filename = 'rg_a4_n3000_cv20_dt10_cr20_basevr05.csv' 
 if RECORD:
     record_file = open(record_filename, 'x', newline='\n')
