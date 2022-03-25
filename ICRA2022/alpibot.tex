@@ -14,11 +14,7 @@
     T\kern-.1667em\lower.7ex\hbox{E}\kern-.125emX}}
 \begin{document}
 
-\title{Conference Paper Title*\\
-{\footnotesize \textsuperscript{*}Note: Sub-titles are not captured in Xplore and
-should not be used}
-% \thanks{Identify applicable funding agency here. If none, delete this.}
-}
+\title{A Tethered Robot for COPD Patients}
 
 \author{Luciano Bianchi, Esteban Alejandro Buniak~\IEEEmembership{Member,~IEEE,}, Rodrigo~Ramele,~\IEEEmembership{Member,~IEEE,}
         and Juan~Miguel~Santos% <-this % stops a space
@@ -27,7 +23,8 @@ of  Computer Engineering, Instituto Tecnológico de Buenos Aires (ITBA), Ciudad 
 \thanks{Manuscript received May 16, 2020; revised July 6, 2020.}}
 
 
-\author{\IEEEauthorblockN{1\textsuperscript{st} Luciano Bianchi}
+\author{
+\IEEEauthorblockN{1\textsuperscript{st} Luciano Bianchi}
 \IEEEauthorblockA{\textit{CIC Laboratory at the Department
 of  Computer Engineering} \\
 \textit{Instituto Tecnológico de Buenos Aires (ITBA)}\\
@@ -39,21 +36,21 @@ lbianchi@itba.edu.ar}
 of  Computer Engineering} \\
 \textit{Instituto Tecnológico de Buenos Aires (ITBA)}\\
 Buenos Aires, Argentina \\
-lbianchi@itba.edu.ar}
+ebuniak@itba.edu.ar}
 \and
 \IEEEauthorblockN{3\textsuperscript{rd} Rodrigo~Ramele,~\IEEEmembership{Member,~IEEE,}}
 \IEEEauthorblockA{\textit{CIC Laboratory at the Department
 of  Computer Engineering} \\
 \textit{Instituto Tecnológico de Buenos Aires (ITBA)}\\
 Buenos Aires, Argentina \\
-lbianchi@itba.edu.ar}
+rramele@itba.edu.ar}
 \and
 \IEEEauthorblockN{4\textsuperscript{th} Juan~Miguel~Santos}
 \IEEEauthorblockA{\textit{CIC Laboratory at the Department
 of  Computer Engineering} \\
 \textit{Instituto Tecnológico de Buenos Aires (ITBA)}\\
 Buenos Aires, Argentina \\
-lbianchi@itba.edu.ar}
+jsantos@itba.edu.ar}
 }
 
 \maketitle
@@ -86,16 +83,9 @@ Patients that suffer Chronic Obstructive Pulmonary Disease (COPD) undergo a proc
 
 %The EEG is traditionally analyzed in terms of temporal waveforms at certain channels, looking at power of rhythms in the spontaneous EEG, at amplitude and latency of the peaks and troughs in event- related potentials (ERPs), or at particular grapho-elements in patho- logical or sleep stages.
 
-\IEEEPARstart{C}{hronic} Obstructive Pulmonary Disease (COPD) is an umbrella term that describes several pulmonary affections.  They are characterized as a slowly progressive condition marked by airflow limitation, being cigarette smoking the main etiologic factor~\cite{MacNee2005}. This pathology presents a musculoskeletal atrophy~\cite{Kocsis2016,Wu2012}. In order to carve these after effects a Pulmonary Rehabilitation procedure is a viable treatment for patients.  Pulmonary Rehabilitation procedures consist of controlled walking activities and physical exercises that patients perform under the supervision of a physical therapist.  However, COPD patients present a severe low oxygen saturation illness and they require oxygen supply, particularly when performing physical activities~\cite{Celli2014}.  Hence, they are required to carry an oxygen tank for the oxygenotherapy assistance, but their own condition hinders their ability to precisely carry the often bulky external tank.  This situation entails to find a pragmatic solution to avoid an additional physical therapist to carry the oxygen tank.  The scenario may be aggravated by the fact that this procedure is performed on a rehabilitation gym that could be potentially crowded with several patients, physiologists and physical therapists.  
+\IEEEPARstart{C}{hronic} Obstructive Pulmonary Disease (COPD) is an umbrella term that describes several pulmonary affections.  They are characterized as a slowly progressive condition marked by airflow limitation, being cigarette smoking the main etiologic factor~\cite{MacNee2005}. This pathology presents a musculoskeletal atrophy~\cite{Kocsis2016,Wu2012}. In order to carve these after effects a Pulmonary Rehabilitation procedure is a viable treatment for patients.  Pulmonary Rehabilitation procedures consist of controlled walking activities and physical exercises that patients perform under the supervision of a physical therapist.  However, COPD patients present a severe low oxygen saturation illness and they require oxygen supply, particularly when performing physical activities~\cite{Celli2014}.  Hence, they are required to carry an oxygen tank for the oxygenotherapy assistance, but their own condition hinders their ability to precisely carry the often bulky external tank. 
 
-%Alternatively, they are required to improvise a customized wheelchair to allow them to carry the oxygen tank on top of it, leading to a cumbersome situation for the physical therapist because s/he had to push and maneuver the wheelchair, and at the same time, take care of the patient and perform the rehabilitation treatment. 
-
-An alternative solution is to use an assitive ground service robot~\cite{Neto2015} to carry the oxygen tank while following the patient in a leader-follower configuration.  There are two reasons that support the initial viability of this idea.  First,  the rehabilitation gym is a constrained environment where this problem can be tackled by an Unmanned Ground Vehicle (UGV).  On the other hand, the range of movements performed by the patient during the Rehabilitation Procedure is highly predictable by the treatment.  At the same time,  the global robotic research community looks forward for the development of robotic affordable solutions to social and health-related worldwide problems~\cite{Khamis2019}.
-
-% For the implementation of the leader-follower strategy, several solutions have been proposed, including Simultaneos Localization And Mapping (SLAM) alternatives, vision-based systems or based on electromagnetical beacons~\cite{Islam2019}.   The work presented by \cite{Ortlieb2016} explores a differential tethered robotic system to perform camera-based gait analysis of the leader.  For COPD Pulmonary Rehabilitaiton procedures, the patient is already umbilicaly linked to the oxygen tank via the breathing cannula.  Hence, a robotic solution can exploit this circumstance to perform the \textit{following} mechanism based on a tethered controller. Tethered robots have been extensively researched in robotics~\cite{Ahn2006}.  They offer a very simple solution to some common navigation problems, and they can be very effective in robot-to robot interaction, collaborative robotics, or while interacting with humans in Human Robot Interfaces~\cite{Rekleitis2001,Hirata2009,Ferrin2010}. 
-
-% At the same time, several assistance devices for COPD treatments have been proposed.  Particularly relevant are novel telemedicine~\cite{Banerjee2020} applications to enhance complementary rehabiliation exercise at home that can track biological markers for patients~\cite{Yang2018,Wu2012}.  The work presented here follows the line established by \cite{Endo2015}.  Authors studied the use of a single thread tethered follower robot for home oxygen therapy, and compared two different control algorithms and their effectiveness to mimic the leader trajectory and to avoid obstacles.  However, their approach focuses on the usage of the device exclusively for home therapy, and not within the context of a Pulmonary Rehabilitation procedure performed by medical personnel on medical facilities.
-
+This is a textbook situation when for an assitive ground service robot~\cite{Neto2015} to carry the oxygen tank while following the patient in a leader-follower configuration.  There are two reasons that support the initial viability of this idea.  First,  the rehabilitation gym is a constrained environment where this problem can be tackled by an Unmanned Ground Vehicle (UGV).  On the other hand, the range of movements performed by the patient during the Rehabilitation Procedure is highly predictable by the treatment. 
 
 This work provides an initial study on the controlling mechanism of a differential tethered robot that implements the leader-follower configuration on a Pulmonary Rehabilitation procedure, following the line established by \cite{Endo2015}.  
 
@@ -104,71 +94,10 @@ This work provides an initial study on the controlling mechanism of a differenti
 
 %This discipline is part of what is being called 4th industrial revolution and is reshaping many aspects of global manufacturing, including robotic and healthcare.
 
-To be effective, any technological solution for the medical community requires active involvement of key stakeholders: physicians, care-givers, patients and their families~\cite{Gaggioli2006,Fasola2012,Cherubini2008,Wolpaw2012BraincomputerIP,Salvini2015}.  Hence, design methodologies that allow rapid prototyping can bring quick feedback from real users about drawbacks or opportunities for improvements. 
-
-Looking forward to achieve this goal, a basic robotic configuration is designed that allows the implementation of the  tethered controlling mechanism, while keeping away other necessary features that will be the focus of future iterations.  This design is first simulated in a simulation environment, and later, a basic hardware prototype based on Internet of Robotic Things~\cite{Simoens2018}  is built to verify the design guidelines and assumptions on a real world scenario.
+A basic robotic configuration is designed that allows quick prototyping and validation by the medical community.  This design is first simulated in a simulation environment, and later, a basic cost-wise hardware prototype based on Internet of Robotic Things~\cite{Simoens2018}  is built to verify the design guidelines and assumptions on a real world scenario.
 
 
 \subsection{Solution Design}
-
-% \begin{figure}[]
-%     \centering
-%     \tikzset{every picture/.style={line width=0.75pt}} %set default line width to 0.75pt        
-%     \begin{tikzpicture}[x=0.50pt,y=0.50pt,yscale=-1,xscale=1]
-%     %uncomment if require: \path (0,1774); %set diagram left start at 0, and has height of 1774
-%     %Shape: Rectangle [id:dp3163749047300972] 
-%     \draw   (341,1289.29) -- (356.46,1289.29) -- (356.46,1484.1) -- (341,1484.1) -- cycle ;
-%     %Straight Lines [id:da006917544597343617] 
-%     \draw [color={rgb, 255:red, 0; green, 0; blue, 0 }  ,draw opacity=1 ][line width=0.75]    (309.46,1464.29) -- (126.19,1383.9) ;
-    
-    
-%     %Straight Lines [id:da6556986586628986] 
-%     \draw [color={rgb, 255:red, 0; green, 0; blue, 0 }  ,draw opacity=1 ][fill={rgb, 255:red, 230; green, 164; blue, 164 }  ,fill opacity=1 ][line width=0.75]    (310.46,1310.29) -- (126.19,1383.9) ;
-    
-    
-%     %Shape: Rectangle [id:dp7070304476532343] 
-%     \draw  [fill={rgb, 255:red, 255; green, 255; blue, 255 }  ,fill opacity=1 ] (309.5,1289) -- (388,1289) -- (388,1324.67) -- (309.5,1324.67) -- cycle ;
-%     %Shape: Ellipse [id:dp4674581553313458] 
-%     \draw  [color={rgb, 255:red, 0; green, 0; blue, 0 }  ,draw opacity=1 ][fill={rgb, 255:red, 255; green, 255; blue, 255 }  ,fill opacity=1 ] (110.01,1383.9) .. controls (110.01,1374.53) and (117.25,1366.94) .. (126.19,1366.94) .. controls (135.12,1366.94) and (142.37,1374.53) .. (142.37,1383.9) .. controls (142.37,1393.28) and (135.12,1400.87) .. (126.19,1400.87) .. controls (117.25,1400.87) and (110.01,1393.28) .. (110.01,1383.9) -- cycle ;
-%     %Shape: Rectangle [id:dp46270765707902994] 
-%     \draw  [fill={rgb, 255:red, 255; green, 255; blue, 255 }  ,fill opacity=1 ] (308.5,1448.5) -- (387,1448.5) -- (387,1484.17) -- (308.5,1484.17) -- cycle ;
-%     %Shape: Circle [id:dp1556138070188774] 
-%     \draw  [fill={rgb, 255:red, 0; green, 0; blue, 0 }  ,fill opacity=1 ] (497.83,1383.83) .. controls (497.83,1379.51) and (501.34,1376) .. (505.67,1376) .. controls (509.99,1376) and (513.5,1379.51) .. (513.5,1383.83) .. controls (513.5,1388.16) and (509.99,1391.67) .. (505.67,1391.67) .. controls (501.34,1391.67) and (497.83,1388.16) .. (497.83,1383.83) -- cycle ;
-%     %Straight Lines [id:da9759075394788362] 
-%     \draw    (362.11,1349.34) -- (505.67,1383.83) ;
-    
-    
-%     %Straight Lines [id:da0292648785573405] 
-%     \draw    (362.11,1423.58) -- (429.74,1404.86) -- (505.67,1383.83) ;
-    
-    
-%     %Rounded Rect [id:dp19413777874284577] 
-%     \draw  [color={rgb, 255:red, 0; green, 0; blue, 0 }  ,draw opacity=1 ][fill={rgb, 255:red, 184; green, 233; blue, 134 }  ,fill opacity=1 ] (336,1423.58) .. controls (336,1422.16) and (337.16,1421) .. (338.58,1421) -- (359.53,1421) .. controls (360.96,1421) and (362.11,1422.16) .. (362.11,1423.58) -- (362.11,1431.34) .. controls (362.11,1432.76) and (360.96,1433.92) .. (359.53,1433.92) -- (338.58,1433.92) .. controls (337.16,1433.92) and (336,1432.76) .. (336,1431.34) -- cycle ;
-%     %Rounded Rect [id:dp9015992902460356] 
-%     \draw  [color={rgb, 255:red, 0; green, 0; blue, 0 }  ,draw opacity=1 ][fill={rgb, 255:red, 184; green, 233; blue, 134 }  ,fill opacity=1 ] (336,1341.58) .. controls (336,1340.16) and (337.16,1339) .. (338.58,1339) -- (359.53,1339) .. controls (360.96,1339) and (362.11,1340.16) .. (362.11,1341.58) -- (362.11,1349.34) .. controls (362.11,1350.76) and (360.96,1351.92) .. (359.53,1351.92) -- (338.58,1351.92) .. controls (337.16,1351.92) and (336,1350.76) .. (336,1349.34) -- cycle ;
-    
-%     % Text Node
-%     \draw  [draw opacity=0][fill={rgb, 255:red, 255; green, 255; blue, 255 }  ,fill opacity=1 ]  (478.5,1350) -- (535.5,1350) -- (535.5,1374) -- (478.5,1374) -- cycle  ;
-%     \draw (517,1362) node    {$subject$};
-%     % Text Node
-%     \draw (302,1344) node    {$left\ reel\  \ $};
-%     % Text Node
-%     \draw (299,1425) node    {$right\ reel\  \ $};
-%     % Text Node
-%     \draw (125,1414) node    {$castor\ wheel$};
-%     % Text Node
-%     \draw (422,1348) node  [rotate=-12.55]  {$left\ thread$};
-%     % Text Node
-%     \draw (423,1422) node  [rotate=-344.79]  {$right\ thread$};
-%     % Text Node
-%     \draw (348,1275) node    {$left\ wheel$};
-%     % Text Node
-%     \draw (348,1496) node    {$right\ wheel$};
-%     \end{tikzpicture}
-%     \caption{Components of the robotic vehicle and the tether mechanism}
-%     \label{fig:components}
-% \end{figure}{}
-
 
 The proposed solution is a Differential-Wheeled Robot (DWR) tethered to the followed subject with two threads ending at a single point attached to the subject waist, back or hand. In the same axis as the two front wheels, the robot has two reels separated by a certain length from which these threads come. As the subject moves away from the robot, the reels release thread so that the patient does not physically drag the vehicle. When the opposite happens, and the vehicle gets closer to the subject, an active spring mechanism driven by electric motors move each reel to retract the thread. The threads need to be tense at all times so that the encoders in each reel can be used to continuously measure the distance between the subject and the reel as devised in Figure~\ref{fig:components}.
 
@@ -384,6 +313,8 @@ In order to standardize the procedure~\cite{Sprunk2016}, we define the desired t
 The reason  this shape was chosen is because it combines different kinds of trajectories where the vehicle can be tested: long straight segments, sharp and soft curves, all in one single shape. Similar curves are also used in other proposed experiments in \cite{Neto2015,Endo2015}.  
 
 Regarding metrics, four are proposed to evaluate the performance.  They are:
+
+DEJA UNA SOLA !!!!!
 
 \begin{itemize}
     \item \textit{Normal trajectory deviation, n.t.d.}: the subject trajectory is divided into small segments and then the normal distance to the robot trajectory is calculated for each of those segments. Trajectory deviation curve is relevant to evaluate how closely the robot mimics the leader trajectory, which is the ultimate goal of the robotic vehicle. 
